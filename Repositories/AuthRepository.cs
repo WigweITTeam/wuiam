@@ -29,9 +29,10 @@ namespace WUIAM.Repositories
         {
             return dbContext.Users.FirstOrDefaultAsync(u => u.UserEmail == Email);
         }
-        public Task<User?> FindUserByEmailOrUserNameAsync(string Email)
+        public async Task<User?> FindUserByEmailOrUserNameAsync(string Email)
         {
-            return dbContext.Users.FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
+            var found = await dbContext.Users.FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
+            return found;
         }
 
         public Task<User?> FindUserByIdAsync(int userId)

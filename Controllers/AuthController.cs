@@ -4,6 +4,7 @@ using WUIAM.Services;
 using WUIAM.Models;
 using WUIAM.Interfaces;
 using WUIAM.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WUIAM.Controllers
 {
@@ -17,7 +18,7 @@ namespace WUIAM.Controllers
         {
             _authService = authService;
         }
-
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
@@ -27,6 +28,7 @@ namespace WUIAM.Controllers
 
             return Ok(result);
         }
+        [AllowAnonymous]
         [HttpPost("verify-login-token")]
         public async Task<IActionResult> VerifyLoginToken([FromBody] VerifyLoginTokenDto request)
         {
@@ -56,7 +58,7 @@ namespace WUIAM.Controllers
 
         //     return Ok(result);
         // }
-
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTo request)
         {
@@ -75,6 +77,7 @@ namespace WUIAM.Controllers
 
             return Ok(result.message);
         }
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
         {
