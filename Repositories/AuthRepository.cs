@@ -14,7 +14,7 @@ namespace WUIAM.Repositories
             dbContext = _context;
         }
 
-        public async Task ExpireTwoFactorTokenAsync(object id)
+        public async Task ExpireTwoFactorTokenAsync(Guid id)
         {
             var token = await dbContext.MFATokens.FindAsync(id);
             if (token != null)
@@ -35,12 +35,12 @@ namespace WUIAM.Repositories
             return found;
         }
 
-        public Task<User?> FindUserByIdAsync(int userId)
+        public Task<User?> FindUserByIdAsync(Guid userId)
         {
-            return dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            return dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        public async Task<MFAToken?> GetLatestTwoFactorTokenAsync(int userId)
+        public async Task<MFAToken?> GetLatestTwoFactorTokenAsync(Guid userId)
         {
             var token = await dbContext.MFATokens.FirstOrDefaultAsync(t => t.UserId == userId);
             return token;
@@ -52,7 +52,7 @@ namespace WUIAM.Repositories
             return await dbContext.SaveChangesAsync().ContinueWith(t => user);
         }
 
-        public async Task<int> SaveTwoFactorTokenAsync(int userId, string twoFactorToken)
+        public async Task<int> SaveTwoFactorTokenAsync(Guid userId, string twoFactorToken)
         {
             var mfaToken = new MFAToken
             {

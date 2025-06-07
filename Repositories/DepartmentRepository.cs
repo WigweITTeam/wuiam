@@ -22,7 +22,7 @@ namespace WUIAM.Repositories
             return await _context.Departments.ToListAsync();
         }
 
-        public async Task<Department?> GetByIdAsync(int id)
+        public async Task<Department?> GetByIdAsync(Guid id)
         {
             return await _context.Departments.FindAsync(id);
         }
@@ -39,7 +39,7 @@ namespace WUIAM.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var department = await _context.Departments.FindAsync(id);
             if (department != null)

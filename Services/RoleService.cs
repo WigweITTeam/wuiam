@@ -21,7 +21,7 @@ namespace WUIAM.Services
             return await _roleRepository.GetAllRolesAsync();
         }
 
-        public async Task<Role> GetRoleByIdAsync(int id)
+        public async Task<Role> GetRoleByIdAsync(Guid id)
         {
             return await _roleRepository.GetRoleByIdAsync(id);
         }
@@ -41,7 +41,7 @@ namespace WUIAM.Services
             return createdRole;
         }
 
-        public async Task<bool> UpdateRoleAsync(int id, RoleUpdateDto roleUpdateDto)
+        public async Task<bool> UpdateRoleAsync(Guid id, RoleUpdateDto roleUpdateDto)
         {
             var existingRole = await _roleRepository.GetRoleByIdAsync(id);
             if (existingRole == null)
@@ -56,23 +56,23 @@ namespace WUIAM.Services
             return updatedRole != null;
         }
 
-        public async Task<bool> AssignRoleToUserAsync(int userId, int roleId)
+        public async Task<bool> AssignRoleToUserAsync(Guid userId, Guid roleId)
         {
             return await _roleRepository.AssignUserToRoleAsync(userId, roleId);
         }
-        public async Task<bool> RemoveRoleFromUserAsync(int userId, int roleId)
+        public async Task<bool> RemoveRoleFromUserAsync(Guid userId, Guid roleId)
         {
             return await _roleRepository.RemoveUserFromRoleAsync(userId, roleId);
         }
-        public async Task<List<Role>> GetRolesForUserAsync(int userId)
+        public async Task<List<Role>> GetRolesForUserAsync(Guid userId)
         {
             return await _roleRepository.GetRolesForUserAsync(userId);
         }
-        public async Task<bool> DeleteRoleAsync(int id)
+        public async Task<bool> DeleteRoleAsync(Guid id)
         {
             return await _roleRepository.DeleteRoleAsync(id);
         }
-        public async Task<List<User>> GetUsersInRoleAsync(int roleId)
+        public async Task<List<User>> GetUsersInRoleAsync(Guid roleId)
         {
             return await _roleRepository.GetUsersInRoleAsync(roleId);
         }

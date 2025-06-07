@@ -25,8 +25,8 @@ namespace WUIAM.DTOs
 
         public DateTime DateCreated { get; set; }
          
-        public int? DepartmentId { get; set; }
-        public int UserTypeId { get;  set; }
+        public Guid? DepartmentId { get; set; }
+        public Guid UserTypeId { get;  set; }
     }
 }
 

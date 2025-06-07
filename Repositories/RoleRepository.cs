@@ -18,14 +18,14 @@ namespace WUIAM.Repositories
         public async Task<List<Role>> GetAllRolesAsync()
         {
             return await _context.Roles
-                .Include(r => r.RolePermissions) // If you want to include RolePermissions
+                .Include(r => r.RolePermissions).Include(r => r.UserRoles) // If you want to include RolePermissions
                 .ToListAsync();
         }
 
-        public async Task<Role> GetRoleByIdAsync(int id)
+        public async Task<Role> GetRoleByIdAsync(Guid id)
         {
             var role = await _context.Roles
-                .Include(r => r.RolePermissions) // If you want to include RolePermissions
+                .Include(r => r.RolePermissions).Include(r => r.UserRoles) // If you want to include RolePermissions
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (role == null)
@@ -63,7 +63,7 @@ namespace WUIAM.Repositories
             return updated.Entity;
         }
 
-        public async Task<bool> DeleteRoleAsync(int id)
+        public async Task<bool> DeleteRoleAsync(Guid id)
         {
             var role = await _context.Roles.FindAsync(id);
             if (role != null)
@@ -75,12 +75,12 @@ namespace WUIAM.Repositories
             return false;
         }
 
-        public Task<bool> RoleExistsAsync(int roleId)
+        public Task<bool> RoleExistsAsync(Guid roleId)
         {
             return _context.Roles.AnyAsync(r => r.Id == roleId);
         }
 
-        public Task<List<User>> GetUsersInRoleAsync(int roleId)
+        public Task<List<User>> GetUsersInRoleAsync(Guid roleId)
         {
             return _context.UserRoles
                 .Where(u => u.RoleId == roleId)
@@ -88,14 +88,14 @@ namespace WUIAM.Repositories
                 .ToListAsync();
         }
 
-        public async Task<bool> AssignUserToRoleAsync(int userId, int roleId)
+        public async Task<bool> AssignUserToRoleAsync(Guid userId, Guid roleId)
         {
             var userRole = new UserRole { UserId = userId, RoleId = roleId };
             _context.UserRoles.Add(userRole);
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> RemoveUserFromRoleAsync(int userId, int roleId)
+        public async Task<bool> RemoveUserFromRoleAsync(Guid userId, Guid roleId)
         {
             var userRole = await _context.UserRoles
                 .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
@@ -107,12 +107,13 @@ namespace WUIAM.Repositories
             return false;
         }
 
-        public Task<List<Role>> GetRolesForUserAsync(int userId)
+        public Task<List<Role>> GetRolesForUserAsync(Guid userId)
         {
-            return _context.UserRoles
+            var roles =  _context.UserRoles
                 .Where(ur => ur.UserId == userId)
                 .Select(ur => ur.Role)
                 .ToListAsync();
+            return roles;
         }
     }
 }

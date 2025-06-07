@@ -24,7 +24,7 @@ namespace WUIAM.Services.Config.SeedService
                     Description = "Administrator role with full access",
 
                 });
-                  _context.SaveChanges();
+                _context.SaveChanges();
             }
             if (!_context.Departments.Any())
             {
@@ -32,10 +32,10 @@ namespace WUIAM.Services.Config.SeedService
                 {
                     Name = "General Administration",
                     Description = "Main administrative department",
-                    HeadOfDepartmentId = 1, // Assuming admin user is the head of this department
-                    // CreatedById = 1 // Assuming admin user created this department
+                    HeadOfDepartmentId = Guid.NewGuid(), // Assuming admin user is the head of this department
+                    // CreatedById = Guid.NewGuid() // Assuming admin user created this department
                 });
-                  _context.SaveChanges();
+                _context.SaveChanges();
             }
             if (!_context.UserTypes.Any())
             {
@@ -45,7 +45,7 @@ namespace WUIAM.Services.Config.SeedService
                     new UserType { Name = "Staff", Description = "Staff user" },
                     new UserType { Name = "Lecturer", Description = "Lecturer user" }
                 });
-                  _context.SaveChanges();
+                _context.SaveChanges();
             }
             if (!_context.Users.Any())
             {
@@ -59,12 +59,12 @@ namespace WUIAM.Services.Config.SeedService
                         DateCreated = DateTime.Now,
                         IsDefault = true,
                         FullName = "Administrator",
-                        UserTypeId = _context.UserTypes.FirstOrDefault()?.Id ?? 1, // Assuming default user type
-                        CreatedById = 1, // Assuming admin user is created by itself
+                        UserTypeId = _context.UserTypes.FirstOrDefault()?.Id ?? Guid.NewGuid(), // Assuming default user type
+                        CreatedById = Guid.NewGuid(), // Assuming admin user is created by itself
                         SingleSignOnEnabled = false,
                         SessionId = Guid.NewGuid().ToString(),
                         SessionTime = DateTime.Now,
-                        DeptId = _context.Departments.FirstOrDefault()?.Id ??1// Assuming no department for admin
+                        DeptId = _context.Departments.FirstOrDefault()?.Id ?? Guid.NewGuid() // Assuming no department for admin
                     });
                     _context.SaveChanges();
                 }
@@ -75,12 +75,39 @@ namespace WUIAM.Services.Config.SeedService
 
                     var userRole = new UserRole
                     {
-                        UserId = existingUser.UserId,
+                        UserId = existingUser.Id,
                         RoleId = existingRole.Id
                     };
 
                     _context.UserRoles.Add(userRole);
                     _context.SaveChanges();
+                }
+
+                if (!_context.Permissions.Any())
+                {
+                    var newPermission = new Permission
+                    {
+                        Name = "ADMIN_ACCESS",
+                        Description = "Permission for admin access to the system"
+                    };
+                    _context.Permissions.Add(newPermission);
+                    _context.SaveChanges();
+                }
+                if (!_context.Roles.FirstOrDefault(r => r.Name == "Admin")?.RolePermissions.Any(rp => rp.Permission.Name == "AdminAccess") ?? true)
+                {
+                    var adminRole = _context.Roles.FirstOrDefault(r => r.Name == "Admin");
+                    var adminPermission = _context.Permissions.FirstOrDefault(p => p.Name == "ADMIN_ACCESS");
+
+                    if (adminRole != null && adminPermission != null)
+                    {
+                        var rolePermission = new RolePermission
+                        {
+                            RoleId = adminRole.Id,
+                            PermissionId = adminPermission.Id
+                        };
+                        _context.RolePermissions.Add(rolePermission);
+                        _context.SaveChanges();
+                    }
                 }
 
 

@@ -5,6 +5,7 @@ using WUIAM.Models;
 using WUIAM.Interfaces;
 using WUIAM.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using WUIAM.Enums;
 
 namespace WUIAM.Controllers
 {
@@ -39,6 +40,7 @@ namespace WUIAM.Controllers
             return Ok(result);
         }
 
+        [HasPermission(Permissions.ManageUsers)]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateUserDto request)
         {

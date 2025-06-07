@@ -7,9 +7,9 @@ namespace WUIAM.Repositories.IRepositories
     public interface IDepartmentRepository
     {
         Task<IEnumerable<Department>> GetAllAsync();
-        Task<Department> GetByIdAsync(int id);
+        Task<Department> GetByIdAsync(Guid id);
         Task AddAsync(Department department);
         Task UpdateAsync(Department department);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(Guid id);
     }
 }

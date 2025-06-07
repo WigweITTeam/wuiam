@@ -29,7 +29,7 @@ namespace WUIAM.Controllers
 
         // GET: api/Department/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Department>> GetById(int id)
+        public async Task<ActionResult<Department>> GetById(Guid id)
         {
             var department = await _departmentService.GetDepartmentByIdAsync(id);
             if (department == null)
@@ -53,7 +53,7 @@ namespace WUIAM.Controllers
 
         // PUT: api/Department/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Department department)
+        public async Task<IActionResult> Update(Guid id, [FromBody] Department department)
         {
             if (id != department.Id)
                 return BadRequest();
@@ -67,7 +67,7 @@ namespace WUIAM.Controllers
 
         // DELETE: api/Department/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _departmentService.DeleteDepartmentAsync(id);
             if (!deleted)

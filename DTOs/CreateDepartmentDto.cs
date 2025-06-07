@@ -2,10 +2,10 @@
 {
     public class CreateDepartmentDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public int HeadOfDepartmentId { get; set; }
+        public Guid HeadOfDepartmentId { get; set; }
     }
 }

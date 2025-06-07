@@ -17,6 +17,8 @@ namespace WUIAM.Models
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<MFAToken> MFATokens { get; set; }
         public DbSet<UserType> UserTypes { get; set; }
+        public DbSet<UserPermission> UserPermissions { get;  set; }
+
         // public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

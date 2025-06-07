@@ -7,15 +7,15 @@ namespace WUIAM.Repositories.IRepositories
     public interface IRoleRepository
     {
         Task<List<Role>> GetAllRolesAsync();
-        Task<Role> GetRoleByIdAsync(int roleId);
+        Task<Role> GetRoleByIdAsync(Guid roleId);
         Task<Role> GetRoleByNameAsync(string roleName);
         Task<Role?> AddRoleAsync(Role role);
         Task<Role?> UpdateRoleAsync(Role role);
-        Task<bool> DeleteRoleAsync(int roleId);
-        Task<bool> RoleExistsAsync(int roleId);
-        Task<List<User>> GetUsersInRoleAsync(int roleId);
-        Task<bool> AssignUserToRoleAsync(int userId, int roleId);
-        Task<bool> RemoveUserFromRoleAsync(int userId, int roleId);
-        Task<List<Role>> GetRolesForUserAsync(int userId);
+        Task<bool> DeleteRoleAsync(Guid roleId);
+        Task<bool> RoleExistsAsync(Guid roleId);
+        Task<List<User>> GetUsersInRoleAsync(Guid roleId);
+        Task<bool> AssignUserToRoleAsync(Guid userId, Guid roleId);
+        Task<bool> RemoveUserFromRoleAsync(Guid userId, Guid roleId);
+        Task<List<Role>> GetRolesForUserAsync(Guid userId);
     }
 }

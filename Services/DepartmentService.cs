@@ -21,7 +21,7 @@ namespace WUIAM.Services
             return _dbContext.Departments.ToListAsync();
         }
 
-        public async Task<Department?> GetDepartmentByIdAsync(int id)
+        public async Task<Department?> GetDepartmentByIdAsync(Guid id)
         {
             return await _dbContext.Departments.FindAsync(id);
         }
@@ -33,7 +33,7 @@ namespace WUIAM.Services
             return Task.FromResult(save.Entity);
         }
 
-        public async Task<Department?> UpdateDepartmentAsync(int id, Department department)
+        public async Task<Department?> UpdateDepartmentAsync(Guid id, Department department)
         {
             var existingDepartment = await _dbContext.Departments.FindAsync(id);
             if (existingDepartment == null)
@@ -49,7 +49,7 @@ namespace WUIAM.Services
             return existingDepartment;
         }
 
-        public async Task<bool> DeleteDepartmentAsync(int id)
+        public async Task<bool> DeleteDepartmentAsync(Guid id)
         {
             var department = await _dbContext.Departments.FindAsync(id);
             if (department != null)

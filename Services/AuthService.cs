@@ -47,7 +47,7 @@ namespace WUIAM.Services
                 // Generate a 2FA token and send it to the user
                 var twoFactorToken = PasswordUtilService.GenerateTwoFactorToken();
                 // save the twoFactorToken to MFAToken table
-                var savedToken = await _authRepository.SaveTwoFactorTokenAsync(user.UserId, PasswordUtilService.HashPassword(twoFactorToken));
+                var savedToken = await _authRepository.SaveTwoFactorTokenAsync(user.Id, PasswordUtilService.HashPassword(twoFactorToken));
               
                 await _notifyService.SendEmailAsync(
                     to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
@@ -62,17 +62,18 @@ namespace WUIAM.Services
             //{
             //    return new { Success = false, data = (object?)null };
             //}
-            return LoginTokenResponse(user);
+            return await LoginTokenResponse(user);
         }
 
         private async Task<dynamic> LoginTokenResponse(User user) 
         {
            var token = GenerateJwtToken(user);
-            user.Password = null;
+         
             user.SessionId = Guid.NewGuid().ToString();
             user.SessionTime = DateTime.Now;
             user.DateLastLoggedIn = DateTime.Now;
             await _authRepository.UpdateUserAsync(user);
+            await _authRepository.ExpireTwoFactorTokenAsync(user.Id);
             await _notifyService.SendEmailAsync(
               to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
               subject: "Login Notification",
@@ -85,9 +86,9 @@ namespace WUIAM.Services
         {
             var claims = new List<Claim>
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.UserEmail ?? ""),
-                    new Claim("id", user.UserId.ToString())
+                    new Claim("id", user.Id.ToString())
                 };
 
             // Add roles as claims
@@ -169,7 +170,7 @@ namespace WUIAM.Services
                 UserName = createUserDto.UserName,
                 FullName = createUserDto.FullName,
                 Password = PasswordUtilService.HashPassword(createUserDto.Password!),
-                CreatedById = 1, // Assuming the admin user is creating this user
+                CreatedById = Guid.NewGuid(), // Assuming the admin user is creating this user
                 DateCreated = DateTime.Now,
                 IsDefault = true, // Assuming new users are default
                 UserTypeId = createUserDto.UserTypeId,
@@ -219,7 +220,7 @@ namespace WUIAM.Services
             }
 
             // Retrieve the latest 2FA token for the user
-            var mfaToken = await _authRepository.GetLatestTwoFactorTokenAsync(user.UserId);
+            var mfaToken = await _authRepository.GetLatestTwoFactorTokenAsync(user.Id);
             if (mfaToken == null)
             {
             return new { Success = false, data = (object?)null, Message = "No 2FA token found." };

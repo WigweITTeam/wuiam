@@ -27,7 +27,7 @@ namespace WUIAM.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(int id)
+        public async Task<ActionResult<Role>> GetRole(Guid id)
         {
             var role = await _roleService.GetRoleByIdAsync(id);
             if (role == null)
@@ -43,7 +43,7 @@ namespace WUIAM.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRole(int id, [FromBody] RoleUpdateDto role)
+        public async Task<IActionResult> UpdateRole(Guid id, [FromBody] RoleUpdateDto role)
         {
             var updated = await _roleService.UpdateRoleAsync(id, role);
             if (!updated)
@@ -53,7 +53,7 @@ namespace WUIAM.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRole(int id)
+        public async Task<IActionResult> DeleteRole(Guid id)
         {
             var deleted = await _roleService.DeleteRoleAsync(id);
             if (!deleted)
@@ -63,7 +63,7 @@ namespace WUIAM.Controllers
         }
 
         [HttpPost("assign/{userId}/{roleId}")]
-        public async Task<IActionResult> AssignRoleToUser(int userId, int roleId)
+        public async Task<IActionResult> AssignRoleToUser(Guid userId, Guid roleId)
         {
             var assigned = await _roleService.AssignRoleToUserAsync(userId, roleId);
             if (!assigned)
@@ -73,7 +73,7 @@ namespace WUIAM.Controllers
         }
 
         [HttpDelete("remove/{userId}/{roleId}")]
-        public async Task<IActionResult> RemoveRoleFromUser(int userId, int roleId)
+        public async Task<IActionResult> RemoveRoleFromUser(Guid userId, Guid roleId)
         {
             var removed = await _roleService.RemoveRoleFromUserAsync(userId, roleId);
             if (!removed)
@@ -83,14 +83,14 @@ namespace WUIAM.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRolesForUser(int userId)
+        public async Task<ActionResult<IEnumerable<Role>>> GetRolesForUser(Guid userId)
         {
             var roles = await _roleService.GetRolesForUserAsync(userId);
             return Ok(roles);
         }
         
         [HttpGet("users/{roleId}")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsersInRole(int roleId)
+        public async Task<ActionResult<IEnumerable<User>>> GetUsersInRole(Guid roleId)
         {
             var users = await _roleService.GetUsersInRoleAsync(roleId);
             if (users == null || users.Count == 0)

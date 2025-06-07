@@ -11,8 +11,8 @@ namespace WUIAM.Models
   public class User
   {
     [Key]
-    [Column("UserID")]
-    public int UserId { get; set; }
+    
+    public Guid Id { get; set; }
 
     [StringLength(90)]
     [Unicode(false)]
@@ -36,7 +36,7 @@ namespace WUIAM.Models
     public DateTime? DateLastLoggedIn { get; set; }
 
     [Column("CreatedByID")]
-    public int CreatedById { get; set; }
+    public Guid CreatedById { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime DateCreated { get; set; }
@@ -51,15 +51,13 @@ namespace WUIAM.Models
     public string? SessionId { get; set; }
 
     public DateTime? SessionTime { get; set; }
-
-    // [Column("RoleID")]
-    // public int RoleId { get; set; }
-    public int UserTypeId { get; set; }
+ 
+    public Guid UserTypeId { get; set; }
     [ForeignKey("UserTypeId")]
     UserType UserType { get; set; }
 
     [Column("DeptID")]
-    public int? DeptId { get; set; }
+    public Guid? DeptId { get; set; }
     public Department Department { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public bool TwoFactorEnabled { get; set; } = true;
