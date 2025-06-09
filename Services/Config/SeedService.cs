@@ -64,6 +64,7 @@ namespace WUIAM.Services.Config.SeedService
                         SingleSignOnEnabled = false,
                         SessionId = Guid.NewGuid().ToString(),
                         SessionTime = DateTime.Now,
+                        TwoFactorEnabled = false,
                         DeptId = _context.Departments.FirstOrDefault()?.Id ?? Guid.NewGuid() // Assuming no department for admin
                     });
                     _context.SaveChanges();
