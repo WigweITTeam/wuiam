@@ -59,6 +59,7 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>(); 
 
+
 // Authentication
 builder.Services.AddAuthentication(options =>
 {

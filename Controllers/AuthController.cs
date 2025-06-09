@@ -51,15 +51,15 @@ namespace WUIAM.Controllers
             return Ok(result);
         }
 
-        // [HttpPost("refresh-token")]
-        // public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
-        // {
-        //     var result = await _authService.RefreshTokenAsync(request);
-        //     if (!result.Success)
-        //         return Unauthorized(result.Message);
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)
+        {
+            var result = await _authService.GetRefreshTokenAsync(request.Token);
+            if (!result.Success)
+                return Unauthorized(result.Message);
 
-        //     return Ok(result);
-        // }
+            return Ok(result);
+        }
         [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTo request)

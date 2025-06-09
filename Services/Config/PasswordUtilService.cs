@@ -1,4 +1,6 @@
-﻿using BCrypt.Net;
+﻿using System.Security.Cryptography;
+using BCrypt.Net;
+using WUIAM.Models;
 
 namespace WUIAM.Services.Config
 {
@@ -20,6 +22,18 @@ namespace WUIAM.Services.Config
             Random random = new Random();
             int token = random.Next(100000, 999999);
             return token.ToString();
+        }
+        public static RefreshToken GenerateRefreshToken(User user)
+        {
+            return (new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                UserId = user.Id,
+                Created = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(7)
+
+            }
+            );
         }
     }
 }

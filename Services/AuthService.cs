@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using WUIAM.DTOs;
@@ -27,14 +28,14 @@ namespace WUIAM.Services
             _jwtIssuer = _configuration["Jwt:Issuer"]!;
             _jwtAudience = _configuration["Jwt:Audience"]!;
         }
-        
+
 
         public async Task<dynamic> LoginAsync(LoginDto loginDto)
         {
             var user = await _authRepository.FindUserByEmailOrUserNameAsync(loginDto.Email);
             if (user == null)
             {
-                return new { Success = false, data = (object?)null,Message="Invalid username or password!" };
+                return new { Success = false, data = (object?)null, Message = "Invalid username or password!" };
             }
             var isValidPassword = PasswordUtilService.VerifyPassword(password: loginDto.Password!, hashedPassword: user.Password!);
             if (!isValidPassword)
@@ -48,14 +49,14 @@ namespace WUIAM.Services
                 var twoFactorToken = PasswordUtilService.GenerateTwoFactorToken();
                 // save the twoFactorToken to MFAToken table
                 var savedToken = await _authRepository.SaveTwoFactorTokenAsync(user.Id, PasswordUtilService.HashPassword(twoFactorToken));
-              
+
                 await _notifyService.SendEmailAsync(
                     to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
                     subject: "Two-Factor Authentication Token",
                     body: EmailTemplateService.GenerateTwoFactorTokenEmailHtml(user.FullName!, twoFactorToken)
                 );
 
-                return new { Success = true, data = user, verifyToken = true , Message = "You have 2FA enable. A login verification email has being sent. Verify login to continue!" };
+                return new { Success = true, data = user, verifyToken = true, Message = "You have 2FA enable. A login verification email has being sent. Verify login to continue!" };
             }
             // If 2FA is not enabled, proceed with normal login
             //if (user.IsDefault == false)
@@ -65,21 +66,26 @@ namespace WUIAM.Services
             return await LoginTokenResponse(user);
         }
 
-        private async Task<dynamic> LoginTokenResponse(User user) 
+        private async Task<dynamic> LoginTokenResponse(User user, bool sendEmail = true)
         {
-           var token = GenerateJwtToken(user);
-         
+            var token = GenerateJwtToken(user);
+
             user.SessionId = Guid.NewGuid().ToString();
             user.SessionTime = DateTime.Now;
             user.DateLastLoggedIn = DateTime.Now;
             await _authRepository.UpdateUserAsync(user);
-            await _authRepository.ExpireTwoFactorTokenAsync(user.Id);
-            await _notifyService.SendEmailAsync(
-              to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
-              subject: "Login Notification",
-              body: EmailTemplateService.GenerateLoginNotificationEmailHtml(user.FullName!, DateTime.Now)
-          );
-            return new { Success = true, data = user, token };
+            if (sendEmail)
+            {
+                // Send login notification email
+                await _notifyService.SendEmailAsync(
+                    to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
+                    subject: "Login Notification",
+                    body: EmailTemplateService.GenerateLoginNotificationEmailHtml(user.FullName!, DateTime.Now)
+                );
+                await _authRepository.ExpireTwoFactorTokenAsync(user.Id);
+            }
+            var refreshToken = await CreateRefreshTokenAsync(user);
+            return new { Success = true, data = user, token, refreshToken = refreshToken.Token, Message = "Login successful!" };
         }
 
         private string GenerateJwtToken(User user)
@@ -110,7 +116,7 @@ namespace WUIAM.Services
                 issuer: _jwtIssuer,
                 audience: _jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(10),
+                expires: DateTime.UtcNow.AddMinutes(15), // Token expiration in 15 minutes time
                 signingCredentials: creds
             );
 
@@ -135,7 +141,8 @@ namespace WUIAM.Services
             var isValidToken = (PasswordUtilService.VerifyPassword(password: resetPasswordDTo.ResetToken.ToString().Trim(), hashedPassword: user.ResetPassordToken.Trim()));
 
 
-            if (!isValidToken) {
+            if (!isValidToken)
+            {
                 return await Task.FromResult(("Invalid token", false));
             }
             var updatedUser = _authRepository.UpdateUserAsync(user);
@@ -143,7 +150,7 @@ namespace WUIAM.Services
             {
                 //send email notification here  
                 await _notifyService.SendEmailAsync(
-                    to:[new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
+                    to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
                     subject: "Password Reset Successful",
                     body: EmailTemplateService.GeneratePasswordResetSuccessEmailHtml(user.FullName!)
                 );
@@ -216,28 +223,47 @@ namespace WUIAM.Services
             var user = await _authRepository.FindUserByEmailOrUserNameAsync(email);
             if (user == null)
             {
-            return new { Success = false, data = (object?)null };
+                return new { Success = false, data = (object?)null };
             }
 
             // Retrieve the latest 2FA token for the user
             var mfaToken = await _authRepository.GetLatestTwoFactorTokenAsync(user.Id);
             if (mfaToken == null)
             {
-            return new { Success = false, data = (object?)null, Message = "No 2FA token found." };
+                return new { Success = false, data = (object?)null, Message = "No 2FA token found." };
             }
 
             // Verify the provided token against the hashed token
             var isValid = PasswordUtilService.VerifyPassword(password: token.Trim(), hashedPassword: mfaToken.Token);
             if (!isValid)
             {
-            return new { Success = false, data = (object?)null, Message = "Invalid 2FA token." };
+                return new { Success = false, data = (object?)null, Message = "Invalid 2FA token." };
             }
 
             // Mark token as used/expired if needed (optional, for security)
-             await _authRepository.ExpireTwoFactorTokenAsync(mfaToken.Id);
+            await _authRepository.ExpireTwoFactorTokenAsync(mfaToken.Id);
 
             // Proceed with login and return JWT token
             return await LoginTokenResponse(user);
+        }
+
+        public Task<RefreshToken> CreateRefreshTokenAsync(User user)
+        {
+            RefreshToken refreshToken = PasswordUtilService.GenerateRefreshToken(user);
+            var savedRefToken = _authRepository.CreateRefreshTokenAsync(refreshToken);
+            return savedRefToken;
+        }
+        public async Task<dynamic> GetRefreshTokenAsync(string refreshToken)
+        {
+            var token = await _authRepository.GetRefreshTokenAsync(refreshToken)
+                ?? throw new InvalidOperationException("Refresh token not found.");
+
+            if (token.IsExpired)
+                throw new InvalidOperationException("Refresh token has expired.");
+
+            var user = await _authRepository.FindUserByIdAsync(token.UserId) ?? throw new InvalidOperationException("User not found for this refresh token.");
+            _authRepository.ExpireRefreshTokenAsync(token);
+            return await LoginTokenResponse(user, false);
         }
     }
 }

@@ -15,7 +15,8 @@ namespace WUIAM.Repositories.IRepositories
         public Task<User> RegisterUserAsync(User user);
         public Task<int> SaveTwoFactorTokenAsync(Guid userId, string twoFactorToken);
         public Task<User> UpdateUserAsync(User user);
-
-
+        public Task<RefreshToken?> GetRefreshTokenAsync(string token);
+        public Task<RefreshToken> CreateRefreshTokenAsync(RefreshToken refreshToken);
+        void ExpireRefreshTokenAsync(RefreshToken token);
     }
 }

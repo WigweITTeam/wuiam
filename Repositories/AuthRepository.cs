@@ -82,5 +82,20 @@ namespace WUIAM.Repositories
             dbContext.Users.Update(user);
             return dbContext.SaveChangesAsync().ContinueWith(t => user);
         }
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+        {
+            return await dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+        }
+
+        public async Task<RefreshToken> CreateRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            await dbContext.RefreshTokens.AddAsync(refreshToken);
+            await dbContext.SaveChangesAsync();
+            return refreshToken;
+        }
+        public  void ExpireRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            dbContext.RefreshTokens.Remove(refreshToken);
+    }
     }
 }

@@ -18,6 +18,7 @@ namespace WUIAM.Models
         public DbSet<MFAToken> MFATokens { get; set; }
         public DbSet<UserType> UserTypes { get; set; }
         public DbSet<UserPermission> UserPermissions { get;  set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         // public DbSet<AuditLog> AuditLogs { get; set; }
 
