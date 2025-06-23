@@ -30,8 +30,8 @@ namespace WUIAM.Services.Config.SeedService
             {
                 _context.Departments.Add(new Department
                 {
-                    Name = "General Administration",
-                    Description = "Main administrative department",
+                    Name = "ICT",
+                    Description = "Main ICT department",
                     HeadOfDepartmentId = Guid.NewGuid(), // Assuming admin user is the head of this department
                     // CreatedById = Guid.NewGuid() // Assuming admin user created this department
                 });
@@ -88,7 +88,7 @@ namespace WUIAM.Services.Config.SeedService
                 {
                     var newPermission = new Permission
                     {
-                        Name = "ADMIN_ACCESS",
+                        Name = "AdminAccess",
                         Description = "Permission for admin access to the system"
                     };
                     _context.Permissions.Add(newPermission);

@@ -2,6 +2,8 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WUIAM.DTOs;
 using WUIAM.Interfaces;
@@ -16,14 +18,18 @@ namespace WUIAM.Services
         private readonly IAuthRepository _authRepository;
         private readonly INotifyService _notifyService;
         private readonly IConfiguration _configuration;
+        private readonly IRoleService _roleService;
         private readonly string _jwtSecret;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
-        public AuthService(IAuthRepository authRepository, INotifyService notifyService, IConfiguration configuration)
+        IHttpContextAccessor _context  ;
+        public AuthService(IAuthRepository authRepository, INotifyService notifyService, IRoleService roleService, IConfiguration configuration, IHttpContextAccessor httpContextAccessor )
         {
             _authRepository = authRepository;
             _notifyService = notifyService;
             _configuration = configuration;
+            _roleService = roleService;
+            _context = httpContextAccessor;
             _jwtSecret = _configuration["Jwt:Key"]!;
             _jwtIssuer = _configuration["Jwt:Issuer"]!;
             _jwtAudience = _configuration["Jwt:Audience"]!;
@@ -55,7 +61,7 @@ namespace WUIAM.Services
                     subject: "Two-Factor Authentication Token",
                     body: EmailTemplateService.GenerateTwoFactorTokenEmailHtml(user.FullName!, twoFactorToken)
                 );
-
+                user.Password = null;
                 return new { Success = true, data = user, verifyToken = true, Message = "You have 2FA enable. A login verification email has being sent. Verify login to continue!" };
             }
             // If 2FA is not enabled, proceed with normal login
@@ -85,6 +91,7 @@ namespace WUIAM.Services
                 await _authRepository.ExpireTwoFactorTokenAsync(user.Id);
             }
             var refreshToken = await CreateRefreshTokenAsync(user);
+            user.Password = null;
             return new { Success = true, data = user, token, refreshToken = refreshToken.Token, Message = "Login successful!" };
         }
 
@@ -116,7 +123,7 @@ namespace WUIAM.Services
                 issuer: _jwtIssuer,
                 audience: _jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15), // Token expiration in 15 minutes time
+                expires: DateTime.UtcNow.AddHours(15), // Token expiration in 15 minutes time
                 signingCredentials: creds
             );
 
@@ -159,9 +166,41 @@ namespace WUIAM.Services
             return await Task.FromResult(("Failed to reset password", false));
         }
 
-        public Task<(string message, bool status)> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+        public async Task<(string message, bool status)> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
-            throw new NotImplementedException();
+            // Step 1: Find user by email
+            var user = await _authRepository.FindUserByEmailAsync(changePasswordDto.Email);
+            if (user == null)
+            {
+                return ("User not found", false);
+            }
+
+            // Step 2: Verify old password
+            var isOldPasswordValid = PasswordUtilService.VerifyPassword(password:  changePasswordDto.OldPassword.Trim(), hashedPassword: user.Password!);
+            if (!isOldPasswordValid)
+            {
+                return ("Old password is incorrect", false);
+            }
+
+            // Step 3: Check new password and confirmation match
+            if (changePasswordDto.NewPassword != changePasswordDto.ConfirmPassword)
+            {
+                return ("New password and confirmation do not match", false);
+            }
+
+            // Step 4: Update password
+            user.Password = PasswordUtilService.HashPassword(changePasswordDto.NewPassword);
+            user.IsDefault = false;
+            await _authRepository.UpdateUserAsync(user);
+
+            // Step 5: Send notification email
+            await _notifyService.SendEmailAsync(
+                to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
+                subject: "Password Changed Successfully",
+                body: EmailTemplateService.GeneratePasswordResetSuccessEmailHtml(user.FullName!)
+            );
+
+            return ("Password changed successfully", true);
         }
 
         public Task<(string message, bool status)> LogoutAsync(string email)
@@ -186,6 +225,30 @@ namespace WUIAM.Services
             var saved = await _authRepository.RegisterUserAsync(mapped);
             if (saved != null)
             {
+                //assign default role
+
+                Claim? userIdClaim = _context.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
+                var staffRole = (await _roleService.GetAllRolesAsync()).FirstOrDefault(a => a.Name.ToLower().Contains( "staff"));
+                if (staffRole !=null)
+                {
+                    Guid assignedBy;
+                    if (!Guid.TryParse(userIdClaim.Value, out assignedBy))
+                    {
+                        // handle error: invalid GUID in claim
+                    }
+                    else
+                    {
+                        var urole = new UserRole
+                        {
+                            UserId = saved.Id,
+                            RoleId = staffRole.Id,
+                            AssignedAt = DateTime.UtcNow,
+                            AssignedBy = assignedBy
+                        };
+                        await _roleService.AssignRoleToUserAsync(saved.Id, staffRole.Id);
+
+                    }
+                }
                 //send email notification here
                 await _notifyService.SendEmailAsync(
                     to: [new EmailReceiver { Email = saved.UserEmail!, Name = saved.FullName! }],
@@ -264,6 +327,24 @@ namespace WUIAM.Services
             var user = await _authRepository.FindUserByIdAsync(token.UserId) ?? throw new InvalidOperationException("User not found for this refresh token.");
             _authRepository.ExpireRefreshTokenAsync(token);
             return await LoginTokenResponse(user, false);
+        }
+
+        public async Task<dynamic> getUserTypes()
+        {
+            Claim? userIdClaim = _context.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
+
+            var userTypes = await _authRepository.getUserTypes();
+            if(userTypes == null)
+            {
+                return new { Message = "No user type registered!", Status = false };
+            }
+            return new { Message = "user types found", Status = true, data = userTypes };
+        }
+        public async Task<IEnumerable<UserDto?>?> GetStaffListAsync()
+        {
+            return await _authRepository.GetStaffListAsync();
+
+
         }
     }
 }

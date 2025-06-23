@@ -1,4 +1,5 @@
-﻿using WUIAM.DTOs;
+﻿using System.Threading.Tasks;
+using WUIAM.DTOs;
 using WUIAM.Models;
 using WUIAM.Services;
 
@@ -16,5 +17,7 @@ namespace WUIAM.Interfaces
         public Task<string> ForgotPasswordAsync(string email);
         public Task<RefreshToken> CreateRefreshTokenAsync(User user);
         public Task<dynamic> GetRefreshTokenAsync(string refreshToken);
+        Task<dynamic>  getUserTypes();
+        Task<IEnumerable<UserDto?>?> GetStaffListAsync();
     }
 }

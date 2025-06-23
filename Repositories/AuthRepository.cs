@@ -31,7 +31,10 @@ namespace WUIAM.Repositories
         }
         public async Task<User?> FindUserByEmailOrUserNameAsync(string Email)
         {
-            var found = await dbContext.Users.FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
+            var found = await dbContext.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
             return found;
         }
 
@@ -96,6 +99,25 @@ namespace WUIAM.Repositories
         public  void ExpireRefreshTokenAsync(RefreshToken refreshToken)
         {
             dbContext.RefreshTokens.Remove(refreshToken);
-    }
+        }
+
+        public async Task<IEnumerable<UserType?>> getUserTypes()
+        {
+           return await dbContext.UserTypes.ToListAsync();
+
+        }
+        public async Task<IEnumerable<UserDto?>?> GetStaffListAsync()
+        { var staffType = dbContext.UserTypes.FirstOrDefault(ut => ut.Name.ToLower().Contains("staff"));
+            if(staffType !=null)
+            return  await dbContext.Users.Where(u => u.UserTypeId == staffType.Id).Select(u =>new
+          UserDto  {
+                Id = u.Id,
+                FullName = u.FullName,
+                Email = u.UserEmail!,
+                UserTypeId = u.UserTypeId,
+                DepartmentId = u.DeptId.GetValueOrDefault()
+            }).ToListAsync();
+            return null;
+        }
     }
 }

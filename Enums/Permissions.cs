@@ -1,7 +1,11 @@
 namespace WUIAM.Enums
 {
     public enum Permissions
+
     {
+        //Admin Access
+        AdminAccess,
+
         // User Management
         ManageUsers,
         ViewUsers,

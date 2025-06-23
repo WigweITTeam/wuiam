@@ -1,46 +1,53 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 using WUIAM.Enums;
 using WUIAM.Interfaces;
-namespace WUIAM.Attributes
-{
 
-}
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
 public class HasPermissionAttribute : Attribute, IAsyncAuthorizationFilter
 {
-    private readonly Permissions _permission;
+    private readonly Permissions[] _permissions;
 
-    public HasPermissionAttribute(Permissions permission)
+    public HasPermissionAttribute(params Permissions[] permissions)
     {
-        _permission = permission;
+        _permissions = permissions;
     }
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         var userIdClaim = context.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
+        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid parsedUserId))
         {
-            context.Result = new ForbidResult();
-            return;
-        }
-
-        var userId = userIdClaim.Value;
-        if (!Guid.TryParse(userId, out Guid parsedUserId))
-        {
-            context.Result = new ForbidResult();
+            context.Result = new JsonResult(new
+            {
+                Message = "You are not authorized to access the requested resource"
+            })
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
             return;
         }
 
         var permissionService = context.HttpContext.RequestServices
             .GetRequiredService<IPermissionService>();
 
-        var hasPermission = await permissionService.UserHasPermissionAsync(parsedUserId, _permission.ToString());
-
-        if (!hasPermission)
+        foreach (var permission in _permissions)
         {
-            context.Result = new ForbidResult();
+            var hasPermission = await permissionService.UserHasPermissionAsync(parsedUserId, permission.ToString());
+            if (hasPermission)
+            {
+                return; // User has at least one required permission: allow access.
+            }
         }
+
+        // None of the required permissions were found
+        context.Result = new JsonResult(new
+        {
+            Message = "You are not authorized to access the requested resource"
+        })
+        {
+            StatusCode = StatusCodes.Status403Forbidden
+        };
     }
 }

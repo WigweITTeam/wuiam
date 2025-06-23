@@ -57,7 +57,8 @@ builder.Services.AddScoped<INotifyService, NotifyService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
-builder.Services.AddScoped<IPermissionRepository, PermissionRepository>(); 
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddHttpContextAccessor();
 
 
 // Authentication

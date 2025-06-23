@@ -6,6 +6,7 @@ using WUIAM.Interfaces;
 using WUIAM.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using WUIAM.Enums;
+using Azure.Core;
 
 namespace WUIAM.Controllers
 {
@@ -39,8 +40,20 @@ namespace WUIAM.Controllers
 
             return Ok(result);
         }
+        //[AllowAnonymous]
+        [HttpGet("users")]
+        public async Task<IActionResult> getUsers()
+        {
 
-        [HasPermission(Permissions.ManageUsers)]
+            var result = await _authService.GetStaffListAsync();
+            if (result == null)
+                return BadRequest(ApiResponse<object>.Failure("Failed to fetch user types", new { reason = "No user found" }));
+
+            return Ok(ApiResponse<IEnumerable<UserDto?>?>.Success("user types found", result));
+
+             
+        }
+        [HasPermission(Permissions.ManageUsers, Permissions.CreateUser)]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateUserDto request)
         {
@@ -54,12 +67,23 @@ namespace WUIAM.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)
         {
-            var result = await _authService.GetRefreshTokenAsync(request.Token);
+            var result = await _authService.GetRefreshTokenAsync(request.RefreshToken);
             if (!result.Success)
                 return Unauthorized(result.Message);
 
             return Ok(result);
         }
+        //[AllowAnonymous]
+        [HttpGet("get-user-type")]
+        public async Task<IActionResult> GetUserTypes()
+        {
+            var result = await _authService.getUserTypes();
+            if (!result.Status)
+                return BadRequest(result.message);
+
+            return Ok(result);
+        }
+
         [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTo request)
@@ -68,7 +92,7 @@ namespace WUIAM.Controllers
             if (!result.status)
                 return BadRequest(result.message);
 
-            return Ok(result.message);
+            return Ok(result);
         }
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto request)
@@ -76,8 +100,7 @@ namespace WUIAM.Controllers
             var result = await _authService.ChangePasswordAsync(request);
             if (!result.status)
                 return BadRequest(result.message);
-
-            return Ok(result.message);
+            return Ok(new { message = result.message, status = result.status });
         }
         [AllowAnonymous]
         [HttpPost("forgot-password")]

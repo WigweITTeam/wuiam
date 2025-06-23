@@ -6,12 +6,13 @@ using WUIAM.Models;
 using WUIAM.Interfaces;
 using WUIAM.DTOs;
 using WUIAM.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WUIAM.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [HasPermission(Permissions.ManagePermissions)]
+    [HasPermission([Permissions.ManagePermissions,Permissions.AdminAccess])]
     public class PermissionController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
@@ -22,11 +23,18 @@ namespace WUIAM.Controllers
         }
 
         // GET: api/Permission
+
+         
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Permission>>> GetAll()
+       
+        public async Task<ActionResult> GetAll()
         {
             var permissions = await _permissionService.GetAllPermissionsAsync();
-            return Ok(permissions);
+            //return Ok(permissions);
+            if (permissions !=null)
+                 return Ok(ApiResponse<IEnumerable<Permission>>.Success("Permissions found!",permissions));
+
+            return Ok(ApiResponse<IEnumerable<Permission>>.Success("No Permission found!", permissions));
         }
 
         // GET: api/Permission/{id}

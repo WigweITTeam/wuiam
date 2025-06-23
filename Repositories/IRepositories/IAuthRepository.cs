@@ -18,5 +18,7 @@ namespace WUIAM.Repositories.IRepositories
         public Task<RefreshToken?> GetRefreshTokenAsync(string token);
         public Task<RefreshToken> CreateRefreshTokenAsync(RefreshToken refreshToken);
         void ExpireRefreshTokenAsync(RefreshToken token);
+        Task<IEnumerable<UserType?>> getUserTypes();
+        Task<IEnumerable<UserDto?>?> GetStaffListAsync();
     }
 }

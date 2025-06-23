@@ -59,6 +59,7 @@ namespace WUIAM.Models
     [Column("DeptID")]
     public Guid? DeptId { get; set; }
     public Department Department { get; set; }
+        public ICollection<UserPermission> UserPermissions { get; set; }
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public bool TwoFactorEnabled { get; set; } = true;
 
