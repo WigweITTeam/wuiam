@@ -20,8 +20,9 @@ namespace WUIAM.Controllers
         {
             _authService = authService;
         }
-        [AllowAnonymous]
+       
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
             var result = await _authService.LoginAsync(request);
