@@ -34,7 +34,7 @@ namespace WUIAM.Services
             var result = await _permissionRepository.GrantPermissionAsync(userId, permission);
             if (result)
             {
-                return (true, "Permission granted successfully.", null);
+                return (true, "Permission granted successfully.", result);
             }
             return (false, "Failed to grant permission.", null);
         }
@@ -44,7 +44,7 @@ namespace WUIAM.Services
             var result = await _permissionRepository.RevokePermissionAsync(userId, permission);
             if (result)
             {
-                return (true, "Permission revoked successfully.", null);
+                return (true, "Permission revoked successfully.", result);
             }
             return (false, "Failed to revoke permission.", null);
         }
@@ -97,6 +97,19 @@ namespace WUIAM.Services
             }
             return (false, "Failed to revoke role permission.", null);
         }
-      
+
+        public async Task<(bool Success, string Message, dynamic? Data)> GetUserPermissionsAsync(Guid userId)
+        {
+            if (userId !=null)
+            {
+                var userPermissions = await _permissionRepository.GetUserPermissionsAsync(userId);
+                if(userPermissions != null)
+                {
+                    return (true, "User permissions found", userPermissions);
+                }
+                return (false, "No user permission found", null);
+            }
+            return (false, "No user permission found", null);
+        }
     }
 }

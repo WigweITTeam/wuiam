@@ -144,6 +144,25 @@ namespace WUIAM.Repositories
             return false;
         }
 
+        public async Task<List<UserPermissionDto>> GetUserPermissionsAsync(Guid userId)
+        {
+            var userPerms = await dbContext.UserPermissions
+                .Where(up => up.UserId == userId)
+                .ToListAsync();
+
+            var permissions = await dbContext.Permissions.ToListAsync();
+
+            var userPermissions = permissions.Select(permission => new UserPermissionDto
+            {
+                Assigned = userPerms.Any(up => up.PermissionId == permission.Id) ? true : false,
+                Description = permission.Description,
+                Name = permission.Name,
+                Id = permission.Id
+            }).ToList();
+
+            return userPermissions;
+        }
+
     }
 }
 

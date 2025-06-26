@@ -72,6 +72,17 @@ namespace WUIAM.Controllers
             return Ok(updated);
         }
 
+        [HttpGet("UserPermissions/{userId}")]
+        public async Task<IActionResult>GetUserPermissions(Guid userId)
+        {
+            var userPermissions = await _permissionService.GetUserPermissionsAsync(userId);
+            if(userPermissions.Success)
+            {
+                return Ok(ApiResponse<List<UserPermissionDto>>.Success(message:"user permissions found!",data:userPermissions.Data));
+            }
+            return BadRequest("Error getting user permissions");
+        }
+
         // DELETE: api/Permission/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
@@ -129,10 +140,13 @@ namespace WUIAM.Controllers
                 return BadRequest(ModelState);
 
             var result = await _permissionService.GrantPermissionToUserAsync(dto.UserId, dto.Permission);
-            if (!result.Success)
-                return BadRequest(result.Message);
+            if (result.Success)
+            {
+                return Ok(ApiResponse<dynamic>.Success(message: "user permissions found!", data: result.Data));
+            }
+            return Ok(ApiResponse<dynamic>.Failure(message: "user permissions found!"));
 
-            return Ok(result);
+
         }
         // POST: api/Permission/RevokePermission
         [HttpPost("RevokePermissionFromUser")]
@@ -143,9 +157,8 @@ namespace WUIAM.Controllers
 
             var result = await _permissionService.RevokePermissionFromUserAsync(dto.UserId, dto.Permission);
             if (!result.Success)
-                return BadRequest(result.Message);
-
-            return Ok(result);
+                return Ok(ApiResponse<dynamic>.Failure(message: "user permissions found!"));
+            return Ok(ApiResponse<dynamic>.Success(message: "user permissions found!", data: result.Data));
         }
         // POST: api/Permission/HasPermission
         [HttpPost("UserHasPermission")]

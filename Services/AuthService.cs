@@ -123,7 +123,7 @@ namespace WUIAM.Services
                 issuer: _jwtIssuer,
                 audience: _jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(15), // Token expiration in 15 minutes time
+                expires: DateTime.UtcNow.AddDays(5), // Token expiration in 15 minutes time
                 signingCredentials: creds
             );
 

@@ -85,4 +85,5 @@ public interface IPermissionService
     /// <param name="permission">The name of the permission to grant.</param>
     /// <returns>A tuple indicating success, a message, and optional data.</returns>
     Task<(bool Success, string Message, object? Data)> GrantPermissionToRoleAsync(Guid roleId, string permission);
+    Task<(bool Success, string Message, dynamic? Data)> GetUserPermissionsAsync(Guid userId);
 }
