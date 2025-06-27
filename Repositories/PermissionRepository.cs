@@ -72,7 +72,7 @@ namespace WUIAM.Repositories
             var hasRolePermission = await dbContext.Users
                 .Where(u => u.Id == userId)
                 .SelectMany(u => u.UserRoles.SelectMany(ur => ur.Role.RolePermissions))
-                .AnyAsync(rp => rp.Permission.Name == permission);
+                .AnyAsync(rp => rp.Permission.Name == permission ||rp.Permission.Name =="AdminAccess");
 
             return hasRolePermission;
         }

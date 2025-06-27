@@ -54,7 +54,7 @@ namespace WUIAM.Services.Config.SeedService
                     _context.Users.Add(new User
                     {
                         UserName = "admin",
-                        UserEmail = "admin@example.com",
+                        UserEmail = "standevcode@gmail.com",
                         Password = PasswordUtilService.HashPassword("admin103#,"),
                         DateCreated = DateTime.Now,
                         IsDefault = true,
@@ -64,7 +64,7 @@ namespace WUIAM.Services.Config.SeedService
                         SingleSignOnEnabled = false,
                         SessionId = Guid.NewGuid().ToString(),
                         SessionTime = DateTime.Now,
-                        TwoFactorEnabled = false,
+                        TwoFactorEnabled = true,
                         DeptId = _context.Departments.FirstOrDefault()?.Id ?? Guid.NewGuid() // Assuming no department for admin
                     });
                     _context.SaveChanges();
