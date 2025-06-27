@@ -256,6 +256,7 @@ namespace WUIAM.Services
                     body: EmailTemplateService.GenerateWelcomeEmailHtml(saved.FullName!, saved.UserEmail!, saved.UserName!, createUserDto.Password!)
                 );
             }
+            saved.Password = null;
             return saved!;
         }
 

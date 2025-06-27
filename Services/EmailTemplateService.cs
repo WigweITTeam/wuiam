@@ -26,12 +26,12 @@ public class EmailTemplateService
               <p style='font-size: 16px;'>Hello <strong>{fullName}</strong>,</p>
               <p style='font-size: 16px;'>Your password has been <strong>reset successfully</strong>. You can now log in with your new password.</p>
               <p style='font-size: 15px;'>If you did not request this change, please contact our support team immediately.</p>
-              <p style='font-size: 15px;'>Thank you for using https://erp.wigweuniversity.edu.ng!</p>
+              <p style='font-size: 15px;'>Thank you for using https://erp.uat.wigweuniversity.edu.ng!</p>
 
               <p style='font-size: 15px;'>Best regards,<br>
               <strong>WU IT Support Team</strong><br>
               <a href='mailto:teamit@wigweuniversity.edu.ng' style='color: #1a73e8;'>teamit@wigweuniversity.edu.ng</a><br>
-              <a href='https://erp.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>https://erp.wigweuniversity.edu.ng</a></p>
+              <a href='https://erp.uat.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>https://erp.uat.wigweuniversity.edu.ng</a></p>
             </td>
           </tr>
           <tr>
@@ -68,7 +68,7 @@ public class EmailTemplateService
           <tr>
             <td style='padding: 30px; color: #333333;'>
               <p style='font-size: 16px;'>Dear <strong>{fullName}</strong>,</p>
-              <p style='font-size: 16px;'>Your account has been successfully created on <strong>https://erp.wigweuniversity.edu.ng</strong>. You can now log in and start using the platform.</p>
+              <p style='font-size: 16px;'>Your account has been successfully created on <strong>https://erp.uat.wigweuniversity.edu.ng</strong>. You can now log in and start using the platform.</p>
 
               <h3 style='color: #1a73e8;'>🔐 Login Credentials</h3>
               <table style='font-size: 15px; margin-bottom: 20px;'>
@@ -97,7 +97,7 @@ public class EmailTemplateService
               <p style='font-size: 15px;'>Warm regards,<br>
               <strong>WU IT Support Team</strong><br>
               <a href='mailto:teamit@wigweuniversity.edu.ng' style='color: #1a73e8;'>teamit@wigweuniversity.edu.ng</a><br>
-              <a href='https://erp.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>https://erp.wigweuniversity.edu.ng</a></p>
+              <a href='https://erp.uat.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>https://erp.uat.wigweuniversity.edu.ng</a></p>
             </td>
           </tr>
           <tr>
@@ -148,7 +148,7 @@ public class EmailTemplateService
               <p style='font-size: 15px;'>Thank you,<br>
             <strong>WU IT Support Team</strong><br>
               <a href='mailto:teamit@wigweuniversity.edu.ng</a><br>
-              <a href='https://erp.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>erp.wigweuniversity.edu.ng</a></p>
+              <a href='https://erp.uat.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>erp.uat.wigweuniversity.edu.ng</a></p>
              </td>
           </tr>
           <tr>
@@ -185,7 +185,7 @@ public class EmailTemplateService
           <tr>
             <td style='padding: 30px; color: #333333;'>
               <p style='font-size: 16px;'>Hello <strong>{fullName}</strong>,</p>
-              <p style='font-size: 16px;'>You have successfully logged in to <strong>https://erp.wigweuniversity.edu.ng</strong> on:</p>
+              <p style='font-size: 16px;'>You have successfully logged in to <strong>https://erp.uat.wigweuniversity.edu.ng</strong> on:</p>
 
               <div style='background-color: #f0f4ff; padding: 12px; font-size: 16px; font-weight: bold; color: #1a73e8; text-align: center; border-radius: 6px; margin: 15px 0;'>
                 {loginTime.ToString("f")}
@@ -193,17 +193,17 @@ public class EmailTemplateService
 
               <p style='font-size: 15px;'>If this wasn’t you, please report immediately to the ICT unit for investigation and assistance.</p>
 
-              <p style='font-size: 15px;'>Thank you for using https://erp.wigweuniversity.edu.ng.</p>
+              <p style='font-size: 15px;'>Thank you for using https://erp.uat.wigweuniversity.edu.ng.</p>
 
               <p style='font-size: 15px;'>Best regards,<br>
               <strong>WU IT Support Team</strong><br>
               <a href='mailto:teamit@wigweuniversity.edu.ng</a><br>
-              <a href='https://erp.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>https://erp.wigweuniversity.edu.ng</a></p>
+              <a href='https://erp.uat.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>https://erp.uat.wigweuniversity.edu.ng</a></p>
             </td>
           </tr>
           <tr>
             <td style='background-color: #f1f1f1; padding: 20px; text-align: center; font-size: 13px; color: #888;'>
-              © 2025 https://erp.wigweuniversity.edu.ng. All rights reserved.
+              © 2025 https://erp.aut.wigweuniversity.edu.ng. All rights reserved.
             </td>
           </tr>
         </table>
@@ -246,12 +246,12 @@ public class EmailTemplateService
               <p style='font-size: 15px;'>Thank you,<br>
               <strong>WU IT Support Team</strong><br>
               <a href='mailto:teamit@wigweuniversity.edu.ng</a><br>
-              <a href='https://erp.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>erp.wigweuniversity.edu.ng</a></p>
+              <a href='https://erp.uat.wigweuniversity.edu.ng' target='_blank' style='color: #1a73e8;'>erp.wigweuniversity.edu.ng</a></p>
             </td>
           </tr>
           <tr>
             <td style='background-color: #f1f1f1; padding: 20px; text-align: center; font-size: 13px; color: #888;'>
-              © 2025 https://erp.wigweuniversity.edu.ng. All rights reserved.
+              © 2025 https://erp.uat.wigweuniversity.edu.ng. All rights reserved.
             </td>
           </tr>
         </table>

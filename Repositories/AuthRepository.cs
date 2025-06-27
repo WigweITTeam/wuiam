@@ -34,6 +34,8 @@ namespace WUIAM.Repositories
             var found = await dbContext.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
+                .Include(up =>up.UserPermissions)
+                .ThenInclude(up =>up.Permission)
                 .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
             return found;
         }
