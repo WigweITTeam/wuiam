@@ -97,7 +97,7 @@ namespace WUIAM.Services.Config.SeedService
                 if (!_context.Roles.FirstOrDefault(r => r.Name == "Admin")?.RolePermissions.Any(rp => rp.Permission.Name == "AdminAccess") ?? true)
                 {
                     var adminRole = _context.Roles.FirstOrDefault(r => r.Name == "Admin");
-                    var adminPermission = _context.Permissions.FirstOrDefault(p => p.Name == "ADMIN_ACCESS");
+                    var adminPermission = _context.Permissions.FirstOrDefault(p => p.Name == "AdminAccess");
 
                     if (adminRole != null && adminPermission != null)
                     {

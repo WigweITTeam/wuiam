@@ -12,7 +12,7 @@ namespace WUIAM.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [HasPermission([Permissions.ManagePermissions,Permissions.AdminAccess])]
+    [HasPermission([Permissions.ManagePermissions])]
     public class PermissionController : ControllerBase
     {
         private readonly IPermissionService _permissionService;

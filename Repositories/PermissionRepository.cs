@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WUIAM.DTOs;
+using WUIAM.Enums;
 using WUIAM.Models;
 using WUIAM.Repositories.IRepositories;
 
@@ -60,21 +61,20 @@ namespace WUIAM.Repositories
         // This method checks if a user has a specific permission, either directly or through their roles.
         public async Task<bool> UserHasPermissionAsync(Guid userId, string permission)
         {
-            // Check direct user permissions
+            // Check direct user permissions  
             var hasUserPermission = await dbContext.UserPermissions
-                .AnyAsync(up => up.UserId == userId && up.Permission.Name == permission);
+                .AnyAsync(up => up.UserId == userId && (up.Permission.Name == permission || up.Permission.Name == Permissions.AdminAccess.ToString()));
 
             if (hasUserPermission)
                 return true;
 
-            // Check role-based permissions
+            // Check role-based permissions  
             var hasRolePermission = await dbContext.Users
                 .Where(u => u.Id == userId)
                 .SelectMany(u => u.UserRoles.SelectMany(ur => ur.Role.RolePermissions))
                 .AnyAsync(rp => rp.Permission.Name == permission);
 
             return hasRolePermission;
-
         }
         public async Task<bool> RevokePermissionAsync(Guid userId, string permission)
         {
