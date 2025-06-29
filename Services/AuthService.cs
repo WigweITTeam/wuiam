@@ -39,6 +39,7 @@ namespace WUIAM.Services
         public async Task<dynamic> LoginAsync(LoginDto loginDto)
         {
             var user = await _authRepository.FindUserByEmailOrUserNameAsync(loginDto.Email);
+            
             if (user == null)
             {
                 return new { Success = false, data = (object?)null, Message = "Invalid username or password!" };
@@ -72,7 +73,7 @@ namespace WUIAM.Services
             return await LoginTokenResponse(user);
         }
 
-        private async Task<dynamic> LoginTokenResponse(User user, bool sendEmail = true)
+        private async Task<dynamic> LoginTokenResponse(User user, bool sendEmail = true,bool generateRefToken=true)
         {
             var token = GenerateJwtToken(user);
 
@@ -90,9 +91,14 @@ namespace WUIAM.Services
                 );
                 await _authRepository.ExpireTwoFactorTokenAsync(user.Id);
             }
-            var refreshToken = await CreateRefreshTokenAsync(user);
+            if (generateRefToken)
+            {
+                var refreshToken = await CreateRefreshTokenAsync(user);
+                return new { Success = true, data = user, token, refreshToken = refreshToken.Token, Message = "Login successful!" };
+
+            }
             user.Password = null;
-            return new { Success = true, data = user, token, refreshToken = refreshToken.Token, Message = "Login successful!" };
+            return new { Success = true, data = user, token,  Message = "Login successful!" };
         }
 
         private string GenerateJwtToken(User user)
@@ -123,7 +129,7 @@ namespace WUIAM.Services
                 issuer: _jwtIssuer,
                 audience: _jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(5), // Token expiration in 15 minutes time
+                expires: DateTime.UtcNow.AddMinutes(1), // Token expiration in 15 minutes time
                 signingCredentials: creds
             );
 
@@ -327,7 +333,7 @@ namespace WUIAM.Services
 
             var user = await _authRepository.FindUserByIdAsync(token.UserId) ?? throw new InvalidOperationException("User not found for this refresh token.");
             _authRepository.ExpireRefreshTokenAsync(token);
-            return await LoginTokenResponse(user, false);
+            return await LoginTokenResponse(user, false,false);
         }
 
         public async Task<dynamic> getUserTypes()

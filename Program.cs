@@ -18,12 +18,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // CORS configuration
+string[] allowedOrigins = new[]
+{
+    "http://localhost:4200",
+    "https://erp.uat.wigweuniversity.edu.ng",
+    "https://erp.wigweuniversity.edu.ng"
+};
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
-        policy => policy.AllowAnyOrigin()
+        policy => policy.WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
-                        .AllowAnyHeader());
+                        .AllowAnyHeader()
+                        .AllowCredentials());
 });
 
 // Configure Brevo (SendinBlue) API
@@ -59,7 +67,6 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddHttpContextAccessor();
-
 
 // Authentication
 builder.Services.AddAuthentication(options =>
@@ -126,9 +133,9 @@ builder.Services.AddSwaggerGen(c =>
 
 // Controllers
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-    });
+{
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+});
 
 // Optional console logger
 builder.Services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider, Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider>();
@@ -151,6 +158,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// ? FIX: Apply CORS BEFORE authentication and authorization
 app.UseCors("AllowAllOrigins");
 
 app.UseAuthentication();

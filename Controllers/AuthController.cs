@@ -7,6 +7,7 @@ using WUIAM.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using WUIAM.Enums;
 using Azure.Core;
+using WUIAM.Migrations;
 
 namespace WUIAM.Controllers
 {
@@ -29,7 +30,7 @@ namespace WUIAM.Controllers
             if (!result.Success)
                 return Unauthorized(result.Message);
 
-            return Ok(result);
+           return Ok(result);
         }
         [AllowAnonymous]
         [HttpPost("verify-login-token")]
@@ -38,6 +39,16 @@ namespace WUIAM.Controllers
             var result = await _authService.VerifyLoginTokenAsync(request.Email, request.Token);
             if (!result.Success)
                 return Unauthorized(result.Message);
+
+            var refreshToken = result.refreshToken;
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Use true in production
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/" // Scope of cookie
+            });
 
             return Ok(result);
         }
@@ -64,11 +75,15 @@ namespace WUIAM.Controllers
 
             return Ok(result);
         }
-
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)
+        public async Task<IActionResult> RefreshToken()
         {
-            var result = await _authService.GetRefreshTokenAsync(request.RefreshToken);
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
+
+             
+            var result = await _authService.GetRefreshTokenAsync(refreshToken);
             if (!result.Success)
                 return Unauthorized(result.Message);
 
@@ -113,14 +128,12 @@ namespace WUIAM.Controllers
 
             return Ok("Reset password email sent successfully.");
         }
+      
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] string email)
+        public IActionResult Logout()
         {
-            var result = await _authService.LogoutAsync(email);
-            if (!result.status)
-                return BadRequest(result.message);
-
-            return Ok(result.message);
+            Response.Cookies.Delete("refresh_token");
+            return Ok();
         }
     }
 
