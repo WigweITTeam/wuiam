@@ -17,16 +17,18 @@ namespace WUIAM.DTOs
 
         [StringLength(150)]
         [Unicode(false)]
-        public string? UserEmail { get; set; }
+        public required string UserEmail { get; set; }
 
         [Unicode(false)]
-        public string? Password { get; set; }
+        public required string Password { get; set; }
 
 
         public DateTime DateCreated { get; set; }
          
         public Guid? DepartmentId { get; set; }
         public Guid UserTypeId { get;  set; }
+        public required string LastName { get;  set; }
+        public required string FirstName { get;  set; }
     }
 
     public class UserDto

@@ -150,18 +150,25 @@ namespace WUIAM.Services
             {
                 return await Task.FromResult(("Passwords do not match", false));
             }
-            user.Password = PasswordUtilService.HashPassword(resetPasswordDTo.NewPassword.ToString());
-            var isValidToken = (PasswordUtilService.VerifyPassword(password: resetPasswordDTo.ResetToken.ToString().Trim(), hashedPassword: user.ResetPassordToken.Trim()));
 
+            // Ensure ResetPassordToken is not null before accessing it  
+            if (string.IsNullOrWhiteSpace(user.ResetPasswordToken))
+            {
+                return await Task.FromResult(("Invalid token", false));
+            }
+
+            user.Password = PasswordUtilService.HashPassword(resetPasswordDTo.NewPassword.ToString());
+            bool isValidToken = PasswordUtilService.VerifyPassword(password: resetPasswordDTo.ResetToken.ToString().Trim(), hashedPassword: user.ResetPasswordToken.Trim());
 
             if (!isValidToken)
             {
                 return await Task.FromResult(("Invalid token", false));
             }
+
             var updatedUser = _authRepository.UpdateUserAsync(user);
             if (updatedUser != null)
             {
-                //send email notification here  
+                // Send email notification here  
                 await _notifyService.SendEmailAsync(
                     to: [new EmailReceiver { Email = user.UserEmail!, Name = user.FullName! }],
                     subject: "Password Reset Successful",
@@ -218,9 +225,10 @@ namespace WUIAM.Services
         {
             var mapped = new User
             {
-                UserEmail = createUserDto.UserEmail,
+                UserEmail = createUserDto.UserEmail!,
                 UserName = createUserDto.UserName,
-                FullName = createUserDto.FullName,
+                FirstName = createUserDto.FirstName,
+                LastName = createUserDto.LastName,
                 Password = PasswordUtilService.HashPassword(createUserDto.Password!),
                 CreatedById = Guid.NewGuid(), // Assuming the admin user is creating this user
                 DateCreated = DateTime.Now,
@@ -277,7 +285,7 @@ namespace WUIAM.Services
             var random = new Random();
             var resetToken = random.Next(100000, 1000000).ToString();
             // Save the reset token to the user or database
-            user.ResetPassordToken = PasswordUtilService.HashPassword(resetToken); // For demo purposes, using token as password
+            user.ResetPasswordToken = PasswordUtilService.HashPassword(resetToken); // For demo purposes, using token as password
             await _authRepository.UpdateUserAsync(user);
             // Send reset password email
             await _notifyService.SendEmailAsync(
@@ -332,7 +340,7 @@ namespace WUIAM.Services
                 throw new InvalidOperationException("Refresh token has expired.");
 
             var user = await _authRepository.FindUserByIdAsync(token.UserId) ?? throw new InvalidOperationException("User not found for this refresh token.");
-            _authRepository.ExpireRefreshTokenAsync(token);
+            //_authRepository.ExpireRefreshTokenAsync(token);
             return await LoginTokenResponse(user, false,false);
         }
 

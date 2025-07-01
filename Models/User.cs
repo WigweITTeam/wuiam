@@ -1,70 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
-namespace WUIAM.Models
+using WUIAM.Models;
+using Newtonsoft.Json;
+namespace WUIAM
 {
-  [Index(nameof(UserEmail), IsUnique = true)]
-  public class User
-  {
-    [Key]
-    
-    public Guid Id { get; set; }
+    public class User
+    {
+        private UserType userType;
 
-    [StringLength(90)]
-    [Unicode(false)]
-    public string? UserName { get; set; }
+        [Key]
+        public Guid Id { get; set; }
 
-    [StringLength(60)]
-    [Unicode(false)]
-    public string? FullName { get; set; }
+        [StringLength(90)]
+        [Unicode(false)]
+        public string? UserName { get; set; }
 
-    [Required]
-    [Unicode(false)]
-    public string? UserEmail { get; set; }
+        [StringLength(90)]
+        [Unicode(false)]
+        public required string FirstName { get; set; }
 
-    [Unicode(false)]
-    public string? Password { get; set; }
+        [StringLength(90)]
+        [Unicode(false)]
+        public required string LastName { get; set; }
 
-    public string? ResetPassordToken { get; set; }
+        public string FullName => $"{FirstName} {LastName}";
 
-    public bool IsDefault { get; set; }
+        [Required]
+        [Unicode(false)]
+        public required string UserEmail { get; set; }
 
-    public DateTime? DateLastLoggedIn { get; set; }
+        [Required]
+        [Unicode(false)]
+        public required string Password { get; set; }
 
-    [Column("CreatedByID")]
-    public Guid CreatedById { get; set; }
+        public string? ResetPasswordToken { get; set; }
 
-    [Column(TypeName = "datetime")]
-    public DateTime DateCreated { get; set; }
+        public bool IsDefault { get; set; }
 
-    [Column("SingleSIgnOnEnabled")]
-    public bool SingleSignOnEnabled { get; set; }
+        public DateTime? DateLastLoggedIn { get; set; }
 
+        [Column("CreatedByID")]
+        public Guid CreatedById { get; set; }
 
+        [Column(TypeName = "datetime")]
+        public DateTime DateCreated { get; set; }
 
-    [Column("SessionID")]
-    [Unicode(false)]
-    public string? SessionId { get; set; }
+        [Column("SingleSignOnEnabled")]
+        public bool SingleSignOnEnabled { get; set; }
 
-    public DateTime? SessionTime { get; set; }
- 
-    public Guid UserTypeId { get; set; }
-    [ForeignKey("UserTypeId")]
-    UserType UserType { get; set; }
+        [Column("SessionID")]
+        [Unicode(false)]
+        public string? SessionId { get; set; }
 
-    [Column("DeptID")]
-    public Guid? DeptId { get; set; }
-    public Department Department { get; set; }
-        public ICollection<UserPermission> UserPermissions { get; set; }
-    public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-    public bool TwoFactorEnabled { get; set; } = true;
+        public DateTime? SessionTime { get; set; }
 
-    [JsonIgnore] 
-    public List<MFAToken> MFATokens { get; set; }
+        public Guid UserTypeId { get; set; }
+        [ForeignKey("UserTypeId")]
+        public UserType UserType { get => userType; set => userType = value; }
 
-  }
+        [Column("DeptID")]
+        public Guid? DeptId { get; set; }
+        public Department? Department { get; set; }
+
+        public ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public bool TwoFactorEnabled { get; set; } = true;
+
+        [JsonIgnore]
+        public List<MFAToken> MFATokens { get; set; } = new List<MFAToken>();
+     
+    } 
 }
