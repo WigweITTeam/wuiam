@@ -19,13 +19,27 @@ namespace WUIAM.Models
         public DbSet<UserType> UserTypes { get; set; }
         public DbSet<UserPermission> UserPermissions { get;  set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<ApprovalStep> ApprovalSteps { get;  set; }
+        public DbSet<ApprovalFlow>ApprovalFlows { get;  set; }
+        public DbSet<LeaveRequest> LeaveRequests { get;  set; }
+        public DbSet<LeaveType> LeaveTypes { get;   set; }
+        public DbSet<LeaveRequestApproval> LeaveRequestApprovals { get;   set; }
+        public DbSet<Leave> Leaves { get;  set; }
+        public DbSet<PublicHoliday> PublicHolidays { get;  set; }
+        public DbSet<LeaveBalance> LeaveBalances { get; set; }
+        public DbSet<EmploymentType> EmploymentTypes { get;  set; }
+        public DbSet<LeaveTypeVisibility> LeaveTypeVisibilities { get; set; }
+        public DbSet<ApprovalDelegation> ApprovalDelegations { get; set; }
+        public DbSet<LeavePolicy> LeavePolicies { get;  set; }
 
         // public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            modelBuilder.Entity<User>()
+            .HasIndex(u => u.UserEmail)
+            .IsUnique();
             // UserRole: composite key
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
@@ -99,6 +113,37 @@ namespace WUIAM.Models
                 .HasMany(d => d.Users)
                 .WithOne(u => u.Department)
                 .HasForeignKey(u => u.DeptId);
+
+            modelBuilder.Entity<LeaveRequest>()
+                .HasOne(lr => lr.LeaveType)
+                .WithMany()
+                .HasForeignKey(lr => lr.LeaveTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Leave>()
+                .HasOne(l => l.LeaveRequest)
+                .WithMany()
+                .HasForeignKey(l => l.LeaveRequestId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<LeaveRequestApproval>()
+                .HasOne(a => a.ApproverPerson)
+                .WithMany()
+                .HasForeignKey(a => a.ApproverPersonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ApprovalDelegation>()
+                .HasOne(d => d.ApproverPerson)
+                .WithMany()
+                .HasForeignKey(d => d.ApproverPersonId)
+                .OnDelete(DeleteBehavior.NoAction); // ✅
+
+            modelBuilder.Entity<ApprovalDelegation>()
+                .HasOne(d => d.DelegatePerson)
+                .WithMany()
+                .HasForeignKey(d => d.DelegatePersonId)
+                .OnDelete(DeleteBehavior.NoAction); // ✅
+
+
         }
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using WUIAM.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,7 @@ builder.Services.AddHangfire(config =>
 });
 builder.Services.AddHangfireServer();
 
+
 // Services & Repositories
 builder.Services.AddTransient<SeedService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -66,6 +68,26 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
+builder.Services.AddScoped<ILeaveRequestApprovalRepository, LeaveRequestApprovalRepository>();
+builder.Services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
+builder.Services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
+builder.Services.AddScoped<ILeaveService, LeaveService>();
+builder.Services.AddScoped<IApprovalFlowRepository, ApprovalFlowRepository>();
+builder.Services.AddScoped<IApprovalStepRepository, ApprovalStepRepository>();
+builder.Services.AddScoped<IApprovalFlowService, ApprovalFlowService>();
+builder.Services.AddScoped<ILeaveTypeService, LeaveTypeService>();
+builder.Services.AddScoped<IPublicHolidayRepository, PublicHolidayRepository>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<ILeavePolicyRepository, LeavePolicyRepository>();
+builder.Services.AddScoped<ILeaveDateCalculator, LeaveDateCalculator>();
+builder.Services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
+
+// builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+// builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+
+
 builder.Services.AddHttpContextAccessor();
 
 // Authentication
@@ -172,6 +194,14 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 
 // Enqueue data seed job
 BackgroundJob.Enqueue<SeedService>(s => s.Seed());
+BackgroundJob.Enqueue<SeedService>(s => s.SeedLeaveBalancesAsync());
+
+
+RecurringJob.AddOrUpdate<LeaveBalanceJob>(
+    "generate-leave-balances-yearly",
+    job => job.GenerateLeaveBalancesForNewCycle(),
+    Cron.Yearly
+);
 
 app.MapControllers();
 

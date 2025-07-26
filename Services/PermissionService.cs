@@ -79,10 +79,10 @@ namespace WUIAM.Services
         {
             return await _permissionRepository.RoleHasPermissionAsync(roleId, permission);
         }
-        public async Task<(bool Success, string Message, dynamic? Data)> GrantPermissionToRoleAsync(Guid roleId, string permission)
+        public async Task<(bool Success, string Message, RolePermission? Data)> GrantPermissionToRoleAsync(Guid roleId, string permission)
         {
             var result = await _permissionRepository.GrantPermissionToRoleAsync(roleId, permission);
-            if (result)
+            if (result != null)
             {
                 return (true, "Role permission granted successfully.", result);
             }
@@ -98,18 +98,32 @@ namespace WUIAM.Services
             return (false, "Failed to revoke role permission.", null);
         }
 
-        public async Task<(bool Success, string Message, dynamic? Data)> GetUserPermissionsAsync(Guid userId)
+        public async Task<(bool Success, string Message, IEnumerable<UserPermissionDto>? Data)> GetUserPermissionsAsync(Guid userId)
         {
-            if (userId !=null)
+            if (userId != null)
             {
                 var userPermissions = await _permissionRepository.GetUserPermissionsAsync(userId);
-                if(userPermissions != null)
+                if  (userPermissions != null)
                 {
                     return (true, "User permissions found", userPermissions);
                 }
                 return (false, "No user permission found", null);
             }
             return (false, "No user permission found", null);
+        }
+
+        public async Task<(bool Success, string Message, IEnumerable<UserPermissionDto?> Data)> GetRolePermissionsAsync(Guid roleId)
+        {
+           if (roleId !=null)
+            {
+                var rolePermissions = await _permissionRepository.GetRolePermissionsAsync(roleId);
+                if(rolePermissions != null)
+                {
+                    return (true, "Role permissions found", rolePermissions) ;
+                }
+                return (false, "No role permission found", null);
+            }
+            return (false, "No role permission found", null);
         }
     }
 }

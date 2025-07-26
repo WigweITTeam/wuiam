@@ -76,7 +76,7 @@ public interface IPermissionService
     /// <param name="roleId">The unique identifier of the role.</param>
     /// <param name="permission">The name of the permission to revoke.</param>
     /// <returns>A tuple indicating success, a message, and optional data.</returns>
-    Task<(bool Success, string Message, object? Data)> RevokePermissionFromRoleAsync(Guid roleId, string permission);
+    Task<(bool Success, string Message, dynamic? Data)> RevokePermissionFromRoleAsync(Guid roleId, string permission);
 
     /// <summary>
     /// Grants a specific permission to a role asynchronously.
@@ -84,6 +84,7 @@ public interface IPermissionService
     /// <param name="roleId">The unique identifier of the role.</param>
     /// <param name="permission">The name of the permission to grant.</param>
     /// <returns>A tuple indicating success, a message, and optional data.</returns>
-    Task<(bool Success, string Message, object? Data)> GrantPermissionToRoleAsync(Guid roleId, string permission);
-    Task<(bool Success, string Message, dynamic? Data)> GetUserPermissionsAsync(Guid userId);
-}
+    Task<(bool Success, string Message, RolePermission? Data)> GrantPermissionToRoleAsync(Guid roleId, string permission); 
+    Task<(bool Success, string Message, IEnumerable<UserPermissionDto>? Data)> GetUserPermissionsAsync(Guid userId);
+    Task<(bool Success, string Message, IEnumerable<UserPermissionDto?> Data)> GetRolePermissionsAsync(Guid roleId);
+} 

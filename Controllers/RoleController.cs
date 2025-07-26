@@ -20,26 +20,26 @@ namespace WUIAM.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
+        public async Task<ActionResult<ApiResponse<IEnumerable<Role>>>> GetRoles()
         {
             var roles = await _roleService.GetAllRolesAsync();
-            return Ok(roles);
+            return Ok(ApiResponse<IEnumerable<Role>>.Success("Roles found", roles));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(Guid id)
+        public async Task<ActionResult<ApiResponse<Role>>> GetRole(Guid id)
         {
             var role = await _roleService.GetRoleByIdAsync(id);
             if (role == null)
-                return NotFound();
-            return Ok(role);
+                return NotFound(ApiResponse<Role>.Failure("Role not found"));
+            return Ok(ApiResponse<Role>.Success("Role found", role));
         }
 
         [HttpPost]
-        public async Task<ActionResult<Role>> CreateRole([FromBody] RoleCreateDto role)
+        public async Task<ActionResult<ApiResponse<Role>>> CreateRole([FromBody] RoleCreateDto role)
         {
             var createdRole = await _roleService.CreateRoleAsync(role);
-            return CreatedAtAction(nameof(GetRole), new { id = createdRole.Id }, createdRole);
+            return CreatedAtAction(nameof(GetRole), new { id = createdRole.Id }, ApiResponse<Role>.Success("Role created", createdRole));
         }
 
         [HttpPut("{id}")]
@@ -63,40 +63,41 @@ namespace WUIAM.Controllers
         }
 
         [HttpPost("assign/{userId}/{roleId}")]
-        public async Task<IActionResult> AssignRoleToUser(Guid userId, Guid roleId)
+        public async Task<ActionResult<ApiResponse<dynamic>>> AssignRoleToUser(Guid userId, Guid roleId)
         {
             var assigned = await _roleService.AssignRoleToUserAsync(userId, roleId);
             if (!assigned)
-                return NotFound();
+                return NotFound(ApiResponse<dynamic>.Failure("Role assignment failed"));
 
-            return Ok(new { Message = "Role assigned to user successfully." });
+            return Ok(ApiResponse<dynamic>.Success("Role assigned to user successfully.", assigned));
         }
 
         [HttpDelete("remove/{userId}/{roleId}")]
-        public async Task<IActionResult> RemoveRoleFromUser(Guid userId, Guid roleId)
+        public async Task<ActionResult<ApiResponse<dynamic>>> RemoveRoleFromUser(Guid userId, Guid roleId)
         {
             var removed = await _roleService.RemoveRoleFromUserAsync(userId, roleId);
             if (!removed)
-                return NotFound();
+                return NotFound(ApiResponse<dynamic>.Failure("Role removal failed"));
 
-            return Ok(new { Message = "Role removed from user successfully." });
+            return Ok(ApiResponse<dynamic>.Success("Role removed from user successfully.", removed));
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRolesForUser(Guid userId)
+        public async Task<ActionResult<ApiResponse<IEnumerable<Role>>>> GetRolesForUser(Guid userId)
         {
             var roles = await _roleService.GetRolesForUserAsync(userId);
-            return Ok(roles);
+            return Ok(ApiResponse<IEnumerable<Role>>.Success("Roles found", roles));
         }
         
         [HttpGet("users/{roleId}")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsersInRole(Guid roleId)
+        public async Task<ActionResult<ApiResponse<IEnumerable<User>>>> GetUsersInRole(Guid roleId)
         {
             var users = await _roleService.GetUsersInRoleAsync(roleId);
             if (users == null || users.Count == 0)
-                return NotFound();
+                return NotFound(ApiResponse<IEnumerable<User>>.Failure("No users found in role"));
 
-            return Ok(users);
+            return Ok(ApiResponse<IEnumerable<User>>.Success("Users found in role", users));
         }
+
     }
 }

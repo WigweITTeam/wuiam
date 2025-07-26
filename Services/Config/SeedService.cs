@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using WUIAM.Enums;
-using WUIAM.Enums;
+using Microsoft.EntityFrameworkCore;
+using WUIAM.Enums; 
 using WUIAM.Models;
 
 namespace WUIAM.Services.Config.SeedService
@@ -26,12 +26,26 @@ namespace WUIAM.Services.Config.SeedService
                     _context.Roles.Add(new()
                     {
                         Name = role,
-                        Description = $"The {role} role access"
+                        Description = "The {role} role access"
                     });
                 }
                 _context.SaveChanges();
             }
+            if (!_context.EmploymentTypes.Any())
+            {
+                var emtypes = Enum.GetNames(typeof(EmploymentTypes));
+                foreach (var emtype in emtypes)
+                {
+                    _context.EmploymentTypes.Add(new()
+                    {
+                        Name = emtype,
+                        Description = "The ${emtype} employment type",
+                        IsActive = true
 
+                    });
+                }
+                _context.SaveChanges(true);
+            }
             // Seed Departments  
             if (!_context.Departments.Any())
             {
@@ -72,7 +86,7 @@ namespace WUIAM.Services.Config.SeedService
                     _context.Permissions.Add(new()
                     {
                         Name = permissionName,
-                        Description = $"Permission to {permissionName.ToLower()}"
+                        Description = "Permission to {permissionName.ToLower()}"
                     });
                 }
                 _context.SaveChanges();
@@ -83,6 +97,7 @@ namespace WUIAM.Services.Config.SeedService
             {
                 var adminUserTypeId = _context.UserTypes.FirstOrDefault()?.Id ?? Guid.NewGuid();
                 var adminDeptId = _context.Departments.FirstOrDefault()?.Id ?? Guid.NewGuid();
+                var employTypeId = _context.EmploymentTypes.FirstOrDefault()?.Id ?? Guid.NewGuid();
 
                 var adminUser = new User
                 {
@@ -92,14 +107,16 @@ namespace WUIAM.Services.Config.SeedService
                     DateCreated = DateTime.Now,
                     IsDefault = true,
                     FirstName = "Administrator",
-                    LastName ="WU",
+                    LastName = "WU",
                     UserTypeId = adminUserTypeId,
                     CreatedById = Guid.NewGuid(),
                     SingleSignOnEnabled = false,
                     SessionId = Guid.NewGuid().ToString(),
                     SessionTime = DateTime.Now,
                     TwoFactorEnabled = true,
-                    DeptId = adminDeptId
+                    DeptId = adminDeptId,
+                    EmploymentTypeId = employTypeId
+
                 };
                 _context.Users.Add(adminUser);
                 _context.SaveChanges();
@@ -128,8 +145,49 @@ namespace WUIAM.Services.Config.SeedService
 
                     _context.SaveChanges();
                 }
-                 
+
             }
         }
+
+        public async Task SeedLeaveBalancesAsync()
+        {
+            var users = await _context.Users.ToListAsync();
+            var policies = await _context.LeavePolicies.Include(lp => lp.LeaveType).ToListAsync();
+
+            var startOfYear = new DateTime(DateTime.UtcNow.Year, 1, 1);
+            var endOfYear = new DateTime(DateTime.UtcNow.Year, 12, 31);
+
+            foreach (var user in users)
+            {
+                foreach (var policy in policies)
+                {
+                    // Check if balance already exists
+                    var existing = await _context.LeaveBalances.FirstOrDefaultAsync(lb =>
+                        lb.UserId == user.Id &&
+                        lb.LeaveTypeId == policy.LeaveTypeId &&
+                        lb.ValidFrom == startOfYear);
+
+                    if (existing != null) continue;
+
+                    var balance = new LeaveBalance
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id,
+                        LeaveTypeId = policy.LeaveTypeId,
+                        TotalDays = policy.AnnualEntitlement,
+                        UsedDays = 0,
+                        RemainingDays = policy.AnnualEntitlement,
+                        ValidFrom = startOfYear,
+                        ValidTo = endOfYear,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _context.LeaveBalances.Add(balance);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

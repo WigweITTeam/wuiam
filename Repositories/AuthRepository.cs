@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using WUIAM.DTOs;
+using WUIAM.DTOs; 
 using WUIAM.Models;
 using WUIAM.Repositories.IRepositories;
 
@@ -34,8 +34,8 @@ namespace WUIAM.Repositories
             var found = await dbContext.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-                .Include(up =>up.UserPermissions)
-                .ThenInclude(up =>up.Permission)
+                .Include(up => up.UserPermissions)
+                .ThenInclude(up => up.Permission)
                 .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
             return found;
         }
@@ -98,28 +98,69 @@ namespace WUIAM.Repositories
             await dbContext.SaveChangesAsync();
             return refreshToken;
         }
-        public  void ExpireRefreshTokenAsync(RefreshToken refreshToken)
+        public void ExpireRefreshTokenAsync(RefreshToken refreshToken)
         {
             dbContext.RefreshTokens.Remove(refreshToken);
         }
 
         public async Task<IEnumerable<UserType?>> getUserTypes()
         {
-           return await dbContext.UserTypes.ToListAsync();
+            return await dbContext.UserTypes.ToListAsync();
 
         }
         public async Task<IEnumerable<UserDto?>?> GetStaffListAsync()
-        { var staffType = dbContext.UserTypes.FirstOrDefault(ut => ut.Name.ToLower().Contains("staff"));
-            if(staffType !=null)
-            return  await dbContext.Users.Where(u => u.UserTypeId == staffType.Id).Select(u =>new
-          UserDto  {
-                Id = u.Id,
-                FullName = u.FullName,
-                Email = u.UserEmail!,
-                UserTypeId = u.UserTypeId,
-                DepartmentId = u.DeptId.GetValueOrDefault()
-            }).ToListAsync();
+        {
+            var staffType = dbContext.UserTypes.FirstOrDefault(ut => ut.Name.ToLower().Contains("staff"));
+            if (staffType != null)
+                return await dbContext.Users.Where(u => u.UserTypeId == staffType.Id).Select(u => new
+              UserDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.UserEmail!,
+                    UserTypeId = u.UserTypeId,
+                    DepartmentId = u.DeptId.GetValueOrDefault()
+                }).ToListAsync();
             return null;
+        }
+
+        public async Task<List<UserDto>> GetUsersByRoleAsync(string approverValue)
+        {
+            if (string.IsNullOrWhiteSpace(approverValue))
+                return new List<UserDto>();
+
+            var lowerValue = approverValue.ToLower();
+
+            var users = await dbContext.Users
+                .Where(u => u.UserRoles.Any(ur => ur.Role.Name.ToLower() == lowerValue))
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.UserEmail,
+                    UserTypeId = u.UserTypeId,
+                })
+                .ToListAsync();
+
+            return users;
+        }
+
+        public async Task<IEnumerable<EmploymentType>> GetEmploymentTypes()
+        {
+            return await dbContext.EmploymentTypes.ToListAsync();
+
+        }
+
+        public Task<UserType> CreateUserTypeAsync(UserType userType)
+        {
+            dbContext.UserTypes.Add(userType);
+            return dbContext.SaveChangesAsync().ContinueWith(t => userType);
+        }
+        public async Task<EmploymentType> CreateEmploymentTypeAsync(EmploymentType employmentType)
+        {
+            await dbContext.EmploymentTypes.AddAsync(employmentType);
+            await dbContext.SaveChangesAsync();
+            return employmentType;
         }
     }
 }

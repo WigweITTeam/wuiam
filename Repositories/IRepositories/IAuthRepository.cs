@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WUIAM.DTOs;
+using WUIAM.Enums;
 using WUIAM.Models;
 
 namespace WUIAM.Repositories.IRepositories
@@ -20,5 +21,9 @@ namespace WUIAM.Repositories.IRepositories
         void ExpireRefreshTokenAsync(RefreshToken token);
         Task<IEnumerable<UserType?>> getUserTypes();
         Task<IEnumerable<UserDto?>?> GetStaffListAsync();
+        Task<List<UserDto>> GetUsersByRoleAsync(string approverValue);
+        Task<IEnumerable<EmploymentType>> GetEmploymentTypes();
+        Task<UserType> CreateUserTypeAsync(UserType userType);
+        Task<EmploymentType> CreateEmploymentTypeAsync(EmploymentType employmentType);
     }
 }

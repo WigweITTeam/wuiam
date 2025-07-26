@@ -1,6 +1,8 @@
 ﻿namespace WUIAM.DTOs
 {
     public class ApiResponse<T>
+        where T : class
+    
     {
         public string Message { get; set; }
         public bool Status { get; set; } // true = success, false = error/failure

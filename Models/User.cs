@@ -70,6 +70,17 @@ namespace WUIAM
 
         [JsonIgnore]
         public List<MFAToken> MFATokens { get; set; } = new List<MFAToken>();
-     
-    } 
+        public Guid EmploymentTypeId { get; set; }
+        public EmploymentType EmploymentType { get; set; }
+        public LeaveBalance LeaveBalance { get;  set; }
+    }
+
+    public class EmploymentType
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }       // e.g., "FullTime", "Contract", "Adjunct"
+        public string Description { get; set; } // Optional: e.g., "Full-time permanent staff"
+        public bool IsActive { get; set; } = true;
+    }
+
 }

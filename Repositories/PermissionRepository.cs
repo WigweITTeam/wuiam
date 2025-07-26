@@ -112,13 +112,13 @@ namespace WUIAM.Repositories
             return await dbContext.RolePermissions
                 .AnyAsync(rp => rp.RoleId == roleId && rp.Permission.Name == permission);
         }
-        public async Task<bool> GrantPermissionToRoleAsync(Guid roleId, string permission)
+        public async Task<RolePermission?> GrantPermissionToRoleAsync(Guid roleId, string permission)
         {
             var existingPermission = await dbContext.Permissions
                 .FirstOrDefaultAsync(p => p.Name == permission);
             if (existingPermission == null)
             {
-                return false; // Permission does not exist
+                return null; // Permission does not exist
             }
 
             var rolePermission = new RolePermission
@@ -129,7 +129,7 @@ namespace WUIAM.Repositories
 
             await dbContext.RolePermissions.AddAsync(rolePermission);
             await dbContext.SaveChangesAsync();
-            return true;
+            return rolePermission;
         }
         public async Task<bool> RevokePermissionFromRoleAsync(Guid roleId, string permission)
         {
@@ -144,7 +144,7 @@ namespace WUIAM.Repositories
             return false;
         }
 
-        public async Task<List<UserPermissionDto>> GetUserPermissionsAsync(Guid userId)
+        public async Task<List<UserPermissionDto>?> GetUserPermissionsAsync(Guid userId)
         {
             var userPerms = await dbContext.UserPermissions
                 .Where(up => up.UserId == userId)
@@ -163,6 +163,20 @@ namespace WUIAM.Repositories
             return userPermissions;
         }
 
+        public  async Task<List<UserPermissionDto>?> GetRolePermissionsAsync(Guid roleId)
+        {
+            var rolePerms= await dbContext.RolePermissions
+                .Where(rp => rp.RoleId == roleId).ToListAsync();
+
+            var permissions = await dbContext.Permissions.ToListAsync();
+            return permissions.Select(rp => new UserPermissionDto
+            {
+                Id = rp.Id,
+                Name = rp.Name,
+                Description = rp.Description,
+                Assigned = rolePerms.Any(up => up.PermissionId == rp.Id) ? true : false,
+            }).ToList();
+        }
     }
 }
 

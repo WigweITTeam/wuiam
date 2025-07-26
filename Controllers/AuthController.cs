@@ -6,7 +6,7 @@ using WUIAM.Interfaces;
 using WUIAM.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using WUIAM.Enums;
-using Azure.Core; 
+
 
 namespace WUIAM.Controllers
 {
@@ -20,16 +20,15 @@ namespace WUIAM.Controllers
         {
             _authService = authService;
         }
-       
-        [HttpPost("login")]
         [AllowAnonymous]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
             var result = await _authService.LoginAsync(request);
             if (!result.Success)
                 return Unauthorized(result.Message);
 
-           return Ok(result);
+            return Ok(result);
         }
         [AllowAnonymous]
         [HttpPost("verify-login-token")]
@@ -62,7 +61,7 @@ namespace WUIAM.Controllers
 
             return Ok(ApiResponse<IEnumerable<UserDto?>?>.Success("user types found", result));
 
-             
+
         }
         [HasPermission(Permissions.ManageUsers, Permissions.CreateUser)]
         [HttpPost("register")]
@@ -81,13 +80,26 @@ namespace WUIAM.Controllers
             var refreshToken = Request.Cookies["refresh_token"];
             if (string.IsNullOrEmpty(refreshToken)) return Unauthorized();
 
-             
+
             var result = await _authService.GetRefreshTokenAsync(refreshToken);
             if (!result.Success)
                 return Unauthorized(result.Message);
 
             return Ok(result);
         }
+
+        //POST: /api/auth/create-user-type
+        [HasPermission(Permissions.ManageUsers, Permissions.CreateUser)]
+        [HttpPost("create-user-type")]
+        public async Task<ActionResult<ApiResponse<UserType>>> CreateUserType([FromBody] UserTypeDto request)
+        {
+            var result = await _authService.CreateUserTypeAsync(request);
+            if (!result.Status)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         //[AllowAnonymous]
         [HttpGet("get-user-type")]
         public async Task<IActionResult> GetUserTypes()
@@ -98,6 +110,33 @@ namespace WUIAM.Controllers
 
             return Ok(result);
         }
+
+        //POST: /api/auth/create-employment-type
+        [HasPermission(Permissions.ManageUsers, Permissions.CreateUser)]
+        [HttpPost("create-employment-type")]
+        public async Task<ActionResult<ApiResponse<EmploymentType>>> CreateEmploymentType([FromBody] EmploymentType request)
+        {
+            if (request == null)
+                return BadRequest(ApiResponse<EmploymentType>.Failure("Invalid employment type data"));
+
+            var result = await _authService.CreateEmploymentTypeAsync(request);
+            if (!result.Status)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("get-employment-types")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<EmploymentType>>>> GetEmploymentTypes()
+        {
+            var result = await _authService.GetEmploymentTypes();
+
+            if (result != null)
+                return Ok(ApiResponse<IEnumerable<EmploymentType>>.Success("employment types found!", (IEnumerable<EmploymentType>)result));
+
+            return Ok(ApiResponse<IEnumerable<EmploymentType>>.Failure("no employment type found!"));
+        }
+
 
         [AllowAnonymous]
         [HttpPost("reset-password")]
@@ -127,7 +166,7 @@ namespace WUIAM.Controllers
 
             return Ok("Reset password email sent successfully.");
         }
-      
+
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -135,5 +174,6 @@ namespace WUIAM.Controllers
             return Ok();
         }
     }
+
 
 }

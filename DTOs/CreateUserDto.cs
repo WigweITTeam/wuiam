@@ -24,11 +24,12 @@ namespace WUIAM.DTOs
 
 
         public DateTime DateCreated { get; set; }
-         
+
         public Guid? DepartmentId { get; set; }
-        public Guid UserTypeId { get;  set; }
-        public required string LastName { get;  set; }
-        public required string FirstName { get;  set; }
+        public Guid UserTypeId { get; set; }
+        public required string LastName { get; set; }
+        public required string FirstName { get; set; }
+        public required Guid EmploymentTypeId { get; set; }
     }
 
     public class UserDto
@@ -38,6 +39,22 @@ namespace WUIAM.DTOs
         public string Email { get; set; } = string.Empty;
         public Guid UserTypeId { get; set; }
         public Guid DepartmentId { get; set; }
+    }
+    public class UserTypeDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime DateCreated { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+    public class EmploymentTypeDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime DateCreated { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }
 

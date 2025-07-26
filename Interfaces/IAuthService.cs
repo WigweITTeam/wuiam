@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using WUIAM.DTOs;
+using WUIAM.Enums;
 using WUIAM.Models;
 using WUIAM.Services;
 
@@ -19,5 +20,8 @@ namespace WUIAM.Interfaces
         public Task<dynamic> GetRefreshTokenAsync(string refreshToken);
         Task<dynamic>  getUserTypes();
         Task<IEnumerable<UserDto?>?> GetStaffListAsync();
+        Task<IEnumerable<EmploymentType>> GetEmploymentTypes();
+        Task<ApiResponse<UserType>> CreateUserTypeAsync(UserTypeDto request);
+        Task<ApiResponse<EmploymentType>> CreateEmploymentTypeAsync(EmploymentType request);
     }
 }

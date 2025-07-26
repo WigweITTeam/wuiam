@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WUIAM.DTOs;
+using WUIAM.Enums;
 using WUIAM.Interfaces;
 using WUIAM.Models;
 using WUIAM.Repositories.IRepositories;
@@ -22,8 +23,10 @@ namespace WUIAM.Services
         private readonly string _jwtSecret;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
-        IHttpContextAccessor _context  ;
-        public AuthService(IAuthRepository authRepository, INotifyService notifyService, IRoleService roleService, IConfiguration configuration, IHttpContextAccessor httpContextAccessor )
+        IHttpContextAccessor _context;
+        public AuthService(IAuthRepository authRepository, INotifyService notifyService,
+        IRoleService roleService, IConfiguration configuration,
+         IHttpContextAccessor httpContextAccessor)
         {
             _authRepository = authRepository;
             _notifyService = notifyService;
@@ -39,7 +42,7 @@ namespace WUIAM.Services
         public async Task<dynamic> LoginAsync(LoginDto loginDto)
         {
             var user = await _authRepository.FindUserByEmailOrUserNameAsync(loginDto.Email);
-            
+
             if (user == null)
             {
                 return new { Success = false, data = (object?)null, Message = "Invalid username or password!" };
@@ -73,7 +76,7 @@ namespace WUIAM.Services
             return await LoginTokenResponse(user);
         }
 
-        private async Task<dynamic> LoginTokenResponse(User user, bool sendEmail = true,bool generateRefToken=true)
+        private async Task<dynamic> LoginTokenResponse(User user, bool sendEmail = true, bool generateRefToken = true)
         {
             var token = GenerateJwtToken(user);
 
@@ -98,7 +101,7 @@ namespace WUIAM.Services
 
             }
             user.Password = null;
-            return new { Success = true, data = user, token,  Message = "Login successful!" };
+            return new { Success = true, data = user, token, Message = "Login successful!" };
         }
 
         private string GenerateJwtToken(User user)
@@ -189,7 +192,7 @@ namespace WUIAM.Services
             }
 
             // Step 2: Verify old password
-            var isOldPasswordValid = PasswordUtilService.VerifyPassword(password:  changePasswordDto.OldPassword.Trim(), hashedPassword: user.Password!);
+            var isOldPasswordValid = PasswordUtilService.VerifyPassword(password: changePasswordDto.OldPassword.Trim(), hashedPassword: user.Password!);
             if (!isOldPasswordValid)
             {
                 return ("Old password is incorrect", false);
@@ -234,7 +237,8 @@ namespace WUIAM.Services
                 DateCreated = DateTime.Now,
                 IsDefault = true, // Assuming new users are default
                 UserTypeId = createUserDto.UserTypeId,
-                DeptId = createUserDto.DepartmentId
+                DeptId = createUserDto.DepartmentId,
+                EmploymentTypeId = createUserDto.EmploymentTypeId
             };
             var saved = await _authRepository.RegisterUserAsync(mapped);
             if (saved != null)
@@ -242,13 +246,14 @@ namespace WUIAM.Services
                 //assign default role
 
                 Claim? userIdClaim = _context.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
-                var staffRole = (await _roleService.GetAllRolesAsync()).FirstOrDefault(a => a.Name.ToLower().Contains( "staff"));
-                if (staffRole !=null)
+                var staffRole = (await _roleService.GetAllRolesAsync()).FirstOrDefault(a => a.Name.ToLower().Contains("staff"));
+                if (staffRole != null)
                 {
                     Guid assignedBy;
                     if (!Guid.TryParse(userIdClaim.Value, out assignedBy))
                     {
-                        // handle error: invalid GUID in claim
+                        throw new UnauthorizedAccessException("Invalid or missing user ID claim.");
+
                     }
                     else
                     {
@@ -341,7 +346,7 @@ namespace WUIAM.Services
 
             var user = await _authRepository.FindUserByIdAsync(token.UserId) ?? throw new InvalidOperationException("User not found for this refresh token.");
             //_authRepository.ExpireRefreshTokenAsync(token);
-            return await LoginTokenResponse(user, false,false);
+            return await LoginTokenResponse(user, false, false);
         }
 
         public async Task<dynamic> getUserTypes()
@@ -349,17 +354,59 @@ namespace WUIAM.Services
             Claim? userIdClaim = _context.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier);
 
             var userTypes = await _authRepository.getUserTypes();
-            if(userTypes == null)
+            if (userTypes == null)
             {
                 return new { Message = "No user type registered!", Status = false };
             }
             return new { Message = "user types found", Status = true, data = userTypes };
         }
+        public async Task<IEnumerable<EmploymentType>> GetEmploymentTypes()
+        {
+            var employmentTypes = await _authRepository.GetEmploymentTypes();
+            return employmentTypes;
+        }
+
+
         public async Task<IEnumerable<UserDto?>?> GetStaffListAsync()
         {
             return await _authRepository.GetStaffListAsync();
 
 
+        }
+
+        public async Task<ApiResponse<UserType>> CreateUserTypeAsync(UserTypeDto request)
+        {
+            var userType = new UserType
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                Description = request.Description,
+                IsActive = request.IsActive
+            };
+
+            var result = await _authRepository.CreateUserTypeAsync(userType);
+            if (result == null)
+            {
+                return ApiResponse<UserType>.Failure("Failed to create user type");
+            }
+            return ApiResponse<UserType>.Success("User Type created successfully!", result);
+        }
+
+        public async Task<ApiResponse<EmploymentType>> CreateEmploymentTypeAsync(EmploymentType request)
+        {
+            var employmentType = new EmploymentType
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                Description = request.Description,
+                IsActive = request.IsActive
+            };
+            var result = await _authRepository.CreateEmploymentTypeAsync(employmentType);
+            if (result == null)
+            {
+                return ApiResponse<EmploymentType>.Failure("Failed to create employment type");
+            }
+            return ApiResponse<EmploymentType>.Success("Employment Type created successfully!", result);
         }
     }
 }

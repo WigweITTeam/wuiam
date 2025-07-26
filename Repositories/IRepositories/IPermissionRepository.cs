@@ -16,8 +16,9 @@ namespace WUIAM.Repositories.IRepositories
         Task<bool> RevokePermissionAsync(Guid userId, string permission);
         Task<bool> GrantPermissionAsync(Guid userId, string permission);
         Task<bool> RoleHasPermissionAsync(Guid roleId, string permission);
-        Task<bool> GrantPermissionToRoleAsync(Guid roleId, string permission);
+        Task<RolePermission?> GrantPermissionToRoleAsync(Guid roleId, string permission);
         Task<bool> RevokePermissionFromRoleAsync(Guid roleId, string permission);
         Task<List<UserPermissionDto>?> GetUserPermissionsAsync(Guid userId);
+        Task<List<UserPermissionDto>?> GetRolePermissionsAsync(Guid roleId);
     }
 }

@@ -39,28 +39,28 @@ namespace WUIAM.Controllers
 
         // GET: api/Permission/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Permission>> GetById(Guid id)
+        public async Task<ActionResult<ApiResponse<Permission>>> GetById(Guid id)
         {
             var permission = await _permissionService.GetPermissionByIdAsync(id);
             if (permission == null)
                 return NotFound();
-            return Ok(permission);
+            return Ok(ApiResponse<Permission>.Success("Permission found!", permission));
         }
 
         // POST: api/Permission
         [HttpPost]
-        public async Task<ActionResult<Permission>> Create([FromBody] PermissionDto dto)
+        public async Task<ActionResult<ApiResponse<Permission>>> Create([FromBody] PermissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var created = await _permissionService.AddPermissionAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return Ok( ApiResponse<Permission>.Success("Permission created successfully!", created));
         }
 
         // PUT: api/Permission/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] PermissionDto dto)
+        public async Task<ActionResult<ApiResponse<Permission>>> Update(Guid id, [FromBody] PermissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -73,14 +73,24 @@ namespace WUIAM.Controllers
         }
 
         [HttpGet("UserPermissions/{userId}")]
-        public async Task<IActionResult>GetUserPermissions(Guid userId)
+        public async Task<ActionResult<ApiResponse<List<UserPermissionDto>>>> GetUserPermissions(Guid userId)
         {
             var userPermissions = await _permissionService.GetUserPermissionsAsync(userId);
             if(userPermissions.Success)
             {
-                return Ok(ApiResponse<List<UserPermissionDto>>.Success(message:"user permissions found!",data:userPermissions.Data));
+                return Ok(ApiResponse<IEnumerable<UserPermissionDto>>.Success(message:"user permissions found!",data:userPermissions.Data!));
             }
             return BadRequest("Error getting user permissions");
+        }
+        [HttpGet("RolePermissions/{roleId}")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<UserPermissionDto>>>> GetRolePermissions(Guid roleId)
+        {
+            var rolePermissions = await _permissionService.GetRolePermissionsAsync(roleId);
+            if(rolePermissions.Success && rolePermissions.Data != null)
+            {
+                return Ok(ApiResponse<IEnumerable<UserPermissionDto>>.Success(message:"role permissions found!",data:rolePermissions.Data!));
+            }
+            return BadRequest(ApiResponse<IEnumerable<UserPermissionDto>>.Failure("Error getting role permissions"));
         }
 
         // DELETE: api/Permission/{id}
@@ -95,33 +105,33 @@ namespace WUIAM.Controllers
         }
         // POST: api/Permission/GrantRolePermission
         [HttpPost("GrantRolePermission")]
-        public async Task<IActionResult> GrantRolePermission([FromBody] GrantRolePermissionDto dto)
+        public async Task<ActionResult<ApiResponse<RolePermission>>> GrantRolePermission([FromBody] GrantRolePermissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var result = await _permissionService.GrantPermissionToRoleAsync(dto.RoleId, dto.Permission);
             if (!result.Success)
-                return BadRequest(result.Message);
+                return BadRequest(ApiResponse<RolePermission>.Failure(message: "Failed to grant role permission")   );
 
-            return Ok(result);
+            return Ok(ApiResponse<RolePermission>.Success(message: "Role permission granted successfully.", data: result.Data));
         }
         // POST: api/Permission/RevokeRolePermission
         [HttpPost("RevokeRolePermission")]
-        public async Task<IActionResult> RevokeRolePermission([FromBody] GrantRolePermissionDto dto)
+        public async Task<ActionResult<ApiResponse<dynamic>>> RevokeRolePermission([FromBody] GrantRolePermissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var result = await _permissionService.RevokePermissionFromRoleAsync(dto.RoleId, dto.Permission);
             if (!result.Success)
-                return BadRequest(result.Message);
+                return BadRequest(ApiResponse<RolePermission>.Failure(message: "Failed to revoke role permission"));
 
-            return Ok(result);
+            return Ok(ApiResponse<RolePermission>.Success(message: "Role permission revoked successfully.", data: result.Data));
         }
         // POST: api/Permission/HasRolePermission
         [HttpPost("RoleHasPermission")]
-        public async Task<IActionResult> RoleHasPermission([FromBody] GrantRolePermissionDto dto)
+        public async Task<ActionResult<ApiResponse<dynamic>>> RoleHasPermission([FromBody] GrantRolePermissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -130,11 +140,11 @@ namespace WUIAM.Controllers
             if (!result)
                 return NotFound();
 
-            return Ok(result);
+            return Ok(ApiResponse<dynamic>.Success(message: "Role has permission", data: result));
         }
         // POST: api/Permission/GrantPermission
         [HttpPost("GrantPermissionToUser")]
-        public async Task<IActionResult> GrantPermissionToUser([FromBody] GrantPermissionDto dto)
+        public async Task<ActionResult<ApiResponse<dynamic>>> GrantPermissionToUser([FromBody] GrantPermissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -142,7 +152,7 @@ namespace WUIAM.Controllers
             var result = await _permissionService.GrantPermissionToUserAsync(dto.UserId, dto.Permission);
             if (result.Success)
             {
-                return Ok(ApiResponse<dynamic>.Success(message: "user permissions found!", data: result.Data));
+                return Ok(ApiResponse<dynamic>.Success(message: "user permissions found!", data: result));
             }
             return Ok(ApiResponse<dynamic>.Failure(message: "user permissions found!"));
 
@@ -158,7 +168,7 @@ namespace WUIAM.Controllers
             var result = await _permissionService.RevokePermissionFromUserAsync(dto.UserId, dto.Permission);
             if (!result.Success)
                 return Ok(ApiResponse<dynamic>.Failure(message: "user permissions found!"));
-            return Ok(ApiResponse<dynamic>.Success(message: "user permissions found!", data: result.Data));
+            return Ok(ApiResponse<dynamic>.Success(message: "user permissions found!", data: result));
         }
         // POST: api/Permission/HasPermission
         [HttpPost("UserHasPermission")]

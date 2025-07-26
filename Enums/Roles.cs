@@ -36,4 +36,46 @@ namespace WUIAM.Enums
         [Display(Name = "Contract Staff")]
         Contractor
     }
+
+    public enum EmploymentTypes
+    {
+        [Display(Name = "Full Time")]
+        FullTime,
+
+        [Display(Name = "Contract")]
+        Contract,
+
+        [Display(Name = "Part Time")]
+        PartTime,
+
+        [Display(Name = "Internship")]
+        Internship,
+
+        [Display(Name = "Temporary")]
+        Temporary
+    }
+
+    public enum EmploymentStatus
+    {
+        [Display(Name = "Active")]
+        Active,
+
+        [Display(Name = "On Leave")]
+        OnLeave,
+
+        [Display(Name = "Suspended")]
+        Suspended,
+
+        [Display(Name = "Terminated")]
+        Terminated,
+
+        [Display(Name = "Resigned")]
+        Resigned,
+
+        [Display(Name = "Retired")]
+        Retired,
+
+        [Display(Name = "On Probation")]
+        OnProbation
+    }
 }
