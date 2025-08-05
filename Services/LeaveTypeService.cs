@@ -1,4 +1,5 @@
-﻿using WUIAM.DTOs;
+﻿using System.Text.Json;
+using WUIAM.DTOs;
 using WUIAM.Interfaces;
 using WUIAM.Models;
 using WUIAM.Repositories.IRepositories;
@@ -13,17 +14,28 @@ namespace WUIAM.Services
             _leaveTypeRepository = leaveTypeRepository;
         }
 
-        public async Task<LeaveType> CreateLeaveType(CreateLeaveTypeDto createLeaveTypeDto)
+        public async Task<LeaveType> CreateLeaveType(CreateLeaveTypeDto dto)
         {
+            var visibilityRules = dto.VisibilityRules.Select(v => new LeaveTypeVisibility
+            {
+                VisibilityType = v.VisibilityType,
+                Value = v.Value
+            }).ToList();
+
             var leaveType = new LeaveType
             {
                 Id = Guid.NewGuid(),
-                Name = createLeaveTypeDto.Name,
-                MaxDays = createLeaveTypeDto.MaxDays,
-                IsPaid = createLeaveTypeDto.IsPaid, 
-                ApprovalFlowId=createLeaveTypeDto.ApprovalFlowId,
-                
+                Name = dto.Name,
+                MaxDays = dto.MaxDays,
+                IsPaid = dto.IsPaid,
+                Description = dto.Description,
+                ColorTag = dto.ColorTag,
+                IsActive = dto.IsActive,
+                RequireDocument = dto.RequireDocument,
+                ApprovalFlowId = dto.ApprovalFlowId,
+                VisibilityRules = visibilityRules
             };
+
             await _leaveTypeRepository.AddAsync(leaveType);
             return leaveType;
         }
@@ -65,6 +77,6 @@ namespace WUIAM.Services
             return existing;
         }
 
-         
+
     }
 }

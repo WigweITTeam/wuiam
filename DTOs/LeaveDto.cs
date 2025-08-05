@@ -19,18 +19,25 @@ namespace WUIAM.DTOs
 
     public class CreateLeaveTypeDto
     {
-        public string Name { get; set; } // e.g., Annual Leave
+        public required string Name { get; set; } // e.g., Annual Leave
         public int MaxDays { get; set; }
         public bool IsPaid { get; set; }
         public string? Description { get; set; }
         public bool IsActive { get; set; } = true;
-        public Guid ApprovalFlowId { get; set; }
-        public string? VisibilityJson { get; set; }
+        public Guid ApprovalFlowId { get; set; } 
+        public string? ColorTag { get; internal set; }
+        public bool? RequireDocument { get; internal set; }
+        public List<LeaveTypeVisibilityDto> VisibilityRules { get; set; } = [];
     }
+public class LeaveTypeVisibilityDto
+{
+    public string VisibilityType { get; set; } = default!;
+    public string Value { get; set; } = default!;
+}
 
     public class CreateApprovalFlowDto
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
         // public Guid LeaveTypeId { get; set; }
         public bool IsActive { get; set; }
         public Guid? CreatedBy { get; set; }

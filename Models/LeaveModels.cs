@@ -7,6 +7,7 @@
         public int MaxDays { get; set; }
         public bool IsPaid { get; set; }
         public string? Description { get; set; }
+        public string? ColorTag { get; set; }
         public bool IsActive { get; set; } = true;
         public bool? RequireDocument { get; set; }
         public Guid ApprovalFlowId { get; set; }
@@ -21,8 +22,8 @@
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? VisibilityJson { get; set; } = string.Empty; // Optional: if approval flow has visibility scope
-      public List<ApprovalStep> Steps { get; set; } = new();
-      }
+        public List<ApprovalStep> Steps { get; set; } = new();
+    }
 
     public class LeaveTypeVisibility
     {
@@ -53,7 +54,7 @@
         public Guid LeaveTypeId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string? SupportDocument {  get; set; }
+        public string? SupportDocument { get; set; }
         public string Reason { get; set; }
         public string Status { get; set; } // Pending, Approved, Rejected
         public DateTime AppliedAt { get; set; }
@@ -69,7 +70,7 @@
         public Guid ApprovalStepId { get; set; }
         public Guid ApproverPersonId { get; set; }
         public string Status { get; set; } = "Pending";// Pending, Approved, Rejected
-        public Guid? ActedByUserId {  get; set; }
+        public Guid? ActedByUserId { get; set; }
         public string? Comment { get; set; }
         public DateTime? DecisionAt { get; set; }
 
@@ -153,28 +154,28 @@
         public ApprovalStep? ApprovalStep { get; set; }
     }
 
-public class LeavePolicy
-{
-    public Guid Id { get; set; }
-    
-    public Guid LeaveTypeId { get; set; }
-    public LeaveType? LeaveType { get; set; }
+    public class LeavePolicy
+    {
+        public Guid Id { get; set; }
 
-    public string? EmploymentType { get; set; } // e.g., "FullTime", "Contract" — optional
-    public string? RoleName { get; set; }       // Optional: if some roles have custom entitlement
+        public Guid LeaveTypeId { get; set; }
+        public LeaveType? LeaveType { get; set; }
 
-    public int AnnualEntitlement { get; set; } = 20;
-    public bool IsAccrualBased { get; set; } = false;
-    public double AccrualRatePerMonth { get; set; } = 1.67;
+        public string? EmploymentType { get; set; } // e.g., "FullTime", "Contract" — optional
+        public string? RoleName { get; set; }       // Optional: if some roles have custom entitlement
 
-    public int MaxCarryOverDays { get; set; } = 0;
-    public bool AllowNegativeBalance { get; set; } = false; 
-    public bool IncludePublicHolidays { get; set; } = false;
-    public bool AllowBackdatedRequest { get; set; } = false;
-    public int MaxDaysPerRequest { get; set; }
+        public int AnnualEntitlement { get; set; } = 20;
+        public bool IsAccrualBased { get; set; } = false;
+        public double AccrualRatePerMonth { get; set; } = 1.67;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-}
+        public int MaxCarryOverDays { get; set; } = 0;
+        public bool AllowNegativeBalance { get; set; } = false;
+        public bool IncludePublicHolidays { get; set; } = false;
+        public bool AllowBackdatedRequest { get; set; } = false;
+        public int MaxDaysPerRequest { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
 
     public static class StatusConstants
     {
