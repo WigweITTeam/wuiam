@@ -82,6 +82,8 @@ builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<ILeavePolicyRepository, LeavePolicyRepository>();
 builder.Services.AddScoped<ILeaveDateCalculator, LeaveDateCalculator>();
 builder.Services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
+builder.Services.AddScoped<ILeaveApprovalService, LeaveApprovalService>();
+
 
 // builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 // builder.Services.AddScoped<IEmployeeService, EmployeeService>();
@@ -189,7 +191,7 @@ app.UseAuthorization();
 // Hangfire Dashboard
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
-    Authorization = new[] { new LocalRequestsOnlyAuthorizationFilter() }
+    //Authorization = new[] { new LocalRequestsOnlyAuthorizationFilter() }
 });
 
 // Enqueue data seed job

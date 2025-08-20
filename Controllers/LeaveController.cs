@@ -50,8 +50,9 @@ namespace WUIAM.Controllers
                 return Ok(request);
             return BadRequest(request);
         }
+
         //POST: api/leave/approve-leave
-        [HttpPost("approve-leave/{approvalId}")]
+        [HttpPost("approve-reject-leave/{approvalId}")]
         public async Task<ActionResult<ApiResponse<LeaveRequest>>> ApproveRejectLeave([FromBody] ApprovalDecisionDto approvalDecisionDto, Guid approvalId)
         {
             var approval = await _leaveService.ApproveOrRejectStepAsync(approvalId, approvalDecisionDto);
@@ -90,6 +91,8 @@ namespace WUIAM.Controllers
                 return Ok(result);
             return BadRequest(result);
         }
+
+      
     }
 
 }

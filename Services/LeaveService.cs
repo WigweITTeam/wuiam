@@ -59,16 +59,15 @@ namespace WUIAM.Services
             _httpContextAccessor = httpContextAccessor;
             _dbContext = dbContext;
         }
-        public async Task<bool> MatchesVisibility(User user, LeaveType leaveType)
-        {
-            var userLeaveVisibility = await _leaveRepository.GetVisibleLeaveTypesForUser(user);
-            if (userLeaveVisibility != null)
-            {
-                return userLeaveVisibility.Any(a => a == leaveType);
-            }
-            return false;
-        }
 
+        async Task<IEnumerable<LeaveType>> GetUserVisibleLeaveTypes()
+        {
+            var userClaim = _httpContextAccessor.HttpContext.User.FindFirstValue(claimType: ClaimTypes.NameIdentifier);
+            Guid.TryParse(userClaim, out Guid userId);
+            var user =await _userRepo.FindUserByIdAsync(userId);
+            var userLeaveVisibility = await _leaveTypeRepo.GetVisibleLeaveTypesForUser(user.Id);
+            return userLeaveVisibility;
+        }
         public async Task<ApiResponse<LeaveRequest>> ApplyForLeaveAsync(LeaveRequestCreateDto dto)
         {
             var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
@@ -83,7 +82,7 @@ namespace WUIAM.Services
             if (leaveType == null)
                 return ApiResponse<LeaveRequest>.Failure("Leave type not found.");
 
-            if (!await MatchesVisibility(user, leaveType))
+            if (!await _leaveTypeRepo. MatchesVisibility(user, leaveType))
                 return ApiResponse<LeaveRequest>.Failure("You are not eligible to request this leave type.");
 
             var policy = await _leavePolicyRepo.GetApplicablePolicyAsync(user, dto.LeaveTypeId);
@@ -105,7 +104,7 @@ namespace WUIAM.Services
             if (approvalFlow == null)
                 return ApiResponse<LeaveRequest>.Failure("Approval flow not configured for this leave type.");
 
-            var steps = await _approvalStepRepo.GetByFlowIdAsync(approvalFlow.Id);
+            var steps =approvalFlow.Steps.Count>0?approvalFlow.Steps: await _approvalStepRepo.GetByFlowIdAsync(approvalFlow.Id);
             if (steps == null || steps.Count == 0)
                 return ApiResponse<LeaveRequest>.Failure("Approval steps not defined for the selected flow.");
 
@@ -122,7 +121,8 @@ namespace WUIAM.Services
                     EndDate = dto.EndDate,
                     Reason = dto.Reason,
                     Status = StatusConstants.Pending,
-                    AppliedAt = DateTime.UtcNow
+                    AppliedAt = DateTime.UtcNow,
+                    TotalDays = requestedDays
                 };
 
                 await _leaveRequestRepo.AddAsync(leaveRequest);
@@ -410,6 +410,14 @@ namespace WUIAM.Services
             return ApiResponse<LeaveRequest>.Success("Leave request updated successfully.", request);
         }
 
-
+        public async Task<ApiResponse<IEnumerable<LeaveRequestApproval>>> GetLeaveRequestApprovals(Guid leaveRequestId)
+        {
+            var approvals =await _approvalRepo.GetByLeaveRequestIdAsync(leaveRequestId);
+            if(approvals.Count > 0)
+            {
+                return ApiResponse<IEnumerable<LeaveRequestApproval>>.Success("Approvals found!", approvals);
+            }
+            return ApiResponse<IEnumerable<LeaveRequestApproval>>.Failure("No Approvals found!");
+        }
     }
 }

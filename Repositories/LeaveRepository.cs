@@ -114,35 +114,7 @@ namespace WUIAM.Repositories
             return await _context.LeaveRequests.Where(r => r.UserId == userId).ToListAsync();
         }
 
-        public async Task<List<LeaveType>> GetVisibleLeaveTypesForUser(User user)
-        {
-            var leaveTypes = await _context.LeaveTypes
-                .Include(lt => lt.VisibilityRules)
-                .ToListAsync();
-
-            return leaveTypes.Where(lt =>
-            {
-                // If no visibility rules, visible to all
-                if (lt.VisibilityRules == null || lt.VisibilityRules.Count == 0) return true;
-
-                // At least one rule must match
-                return lt.VisibilityRules.Any(rule =>
-                {
-                    var type = rule.VisibilityType.ToUpper();
-
-                    return type switch
-                    {
-                        "ROLE" => user.UserRoles.Any(ur => ur.Role.Name == rule.Value),
-                        "DEPARTMENT" => user.Department != null && user.Department.Name == rule.Value,
-                        "EMPLOYMENT_TYPE" => user.EmploymentType != null && user.EmploymentType.Name == rule.Value,
-                        "USER_TYPE" => user.UserType !=null && user.UserType.Name ==rule.Value,
-                        _ => false
-                    };
-                });
-            }).ToList();
-        }
-
-
+   
         public async Task<Leave> CreateLeaveFromApprovedRequestAsync(LeaveRequest request)
         {
             var publicHolidays = await _context.PublicHolidays.ToListAsync();

@@ -24,9 +24,10 @@ namespace WUIAM.DTOs
         public bool IsPaid { get; set; }
         public string? Description { get; set; }
         public bool IsActive { get; set; } = true;
+        public string? Gender {  get; set; }
         public Guid ApprovalFlowId { get; set; } 
-        public string? ColorTag { get; internal set; }
-        public bool? RequireDocument { get; internal set; }
+        public string? ColorTag { get;  set; }
+        public bool? RequireDocument { get;  set; }
         public List<LeaveTypeVisibilityDto> VisibilityRules { get; set; } = [];
     }
 public class LeaveTypeVisibilityDto
@@ -77,7 +78,7 @@ public class LeavePolicyDto
 { 
     
     public Guid LeaveTypeId { get; set; }
-        public string? EmploymentType { get; set; } // e.g., "FullTime", "Contract" — optional
+        public Guid EmploymentTypeId { get; set; } // e.g., "FullTime", "Contract" — optional
     public string? RoleName { get; set; }       // Optional: if some roles have custom entitlement
 
     public int AnnualEntitlement { get; set; } = 20;
@@ -89,5 +90,21 @@ public class LeavePolicyDto
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+    public class LeaveRequestDto
+    {
+        public Guid UserId { get; set; }
+        public Guid LeaveTypeId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string? SupportDocument { get; set; }
+        public string Reason { get; set; }
+        public string Status { get; set; } // Pending, Approved, Rejected
+        public DateTime AppliedAt { get; set; }
+       public int? TotalDays { get; set; }
+        public LeaveType? LeaveType { get; set; }
+        public User? User { get; set; }
+
+        public Guid? Id { get; set; }
+    }
 
 }

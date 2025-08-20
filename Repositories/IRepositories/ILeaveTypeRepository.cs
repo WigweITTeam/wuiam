@@ -12,5 +12,9 @@ namespace WUIAM.Repositories.IRepositories
         Task UpdateAsync(LeaveType leaveType);
 
         Task DeleteAsync(Guid id);
+        Task<LeaveTypeVisibility> getLeaveTypeVisibiltyById(Guid id);
+        Task<List<LeaveType>> GetVisibleLeaveTypesForUser(Guid user);
+
+        Task<bool> MatchesVisibility(User user, LeaveType leaveType);
     }
 }

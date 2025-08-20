@@ -31,6 +31,7 @@ namespace WUIAM.Models
         public DbSet<LeaveTypeVisibility> LeaveTypeVisibilities { get; set; }
         public DbSet<ApprovalDelegation> ApprovalDelegations { get; set; }
         public DbSet<LeavePolicy> LeavePolicies { get;  set; }
+        public DbSet<LeavePolicy> MyLeavePolicies { get; set; }
 
         // public DbSet<AuditLog> AuditLogs { get; set; }
 
@@ -135,13 +136,20 @@ namespace WUIAM.Models
                 .HasOne(d => d.ApproverPerson)
                 .WithMany()
                 .HasForeignKey(d => d.ApproverPersonId)
-                .OnDelete(DeleteBehavior.NoAction); // ✅
+                .OnDelete(DeleteBehavior.NoAction); 
 
             modelBuilder.Entity<ApprovalDelegation>()
                 .HasOne(d => d.DelegatePerson)
                 .WithMany()
                 .HasForeignKey(d => d.DelegatePersonId)
-                .OnDelete(DeleteBehavior.NoAction); // ✅
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<LeaveType>()
+                .HasMany(l => l.VisibilityRules)
+                .WithOne(v => v.LeaveType) // explicitly specify the navigation property
+                .HasForeignKey(v => v.LeaveTypeId) // explicitly specify the foreign key
+                .OnDelete(DeleteBehavior.Cascade);
+            // This enables database-level cascade delete
 
 
         }

@@ -79,5 +79,19 @@ namespace WUIAM.Controllers
             }
             return ApiResponse<LeaveType>.Failure("Failed to delete leave type");
         }
+
+        // GET: api/leavetype/available
+        [HttpGet("available")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<LeaveType>>>> AvailableLeaveTypes()
+        {
+            var availableLeaveTypes =await _leaveTypeService.GetAvailableLeaveTypes();
+            if(availableLeaveTypes != null)
+            {
+                return Ok(ApiResponse<IEnumerable<LeaveType>>.Success("available leave types found!", availableLeaveTypes));
+            }
+            return BadRequest(ApiResponse<IEnumerable<LeaveType>>.Failure("Error occured"));
+
+        }
+
     }
 }

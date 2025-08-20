@@ -12,8 +12,8 @@ using WUIAM.Models;
 namespace WUIAM.Migrations
 {
     [DbContext(typeof(WUIAMDbContext))]
-    [Migration("20250714133057_UserEmailUnique")]
-    partial class UserEmailUnique
+    [Migration("20250814130013_leave_changes")]
+    partial class leave_changes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -107,7 +107,6 @@ namespace WUIAM.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VisibilityJson")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -133,7 +132,6 @@ namespace WUIAM.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConditionJson")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StepOrder")
@@ -252,6 +250,60 @@ namespace WUIAM.Migrations
                     b.ToTable("LeaveBalances");
                 });
 
+            modelBuilder.Entity("WUIAM.Models.LeavePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("AccrualRatePerMonth")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("AllowBackdatedRequest")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AllowNegativeBalance")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AnnualEntitlement")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmploymentTypeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("EmploymentTypeId1")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IncludePublicHolidays")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAccrualBased")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LeaveTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MaxCarryOverDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxDaysPerRequest")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RoleName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmploymentTypeId1");
+
+                    b.HasIndex("LeaveTypeId");
+
+                    b.ToTable("LeavePolicy");
+                });
+
             modelBuilder.Entity("WUIAM.Models.LeaveRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -299,7 +351,7 @@ namespace WUIAM.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ActedByUserId")
+                    b.Property<Guid?>("ActedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ApprovalStepId")
@@ -340,6 +392,19 @@ namespace WUIAM.Migrations
 
                     b.Property<Guid>("ApprovalFlowId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ColorTag")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPaid")
                         .HasColumnType("bit");
@@ -776,6 +841,25 @@ namespace WUIAM.Migrations
                     b.Navigation("LeaveType");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WUIAM.Models.LeavePolicy", b =>
+                {
+                    b.HasOne("WUIAM.EmploymentType", "EmploymentType")
+                        .WithMany()
+                        .HasForeignKey("EmploymentTypeId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WUIAM.Models.LeaveType", "LeaveType")
+                        .WithMany()
+                        .HasForeignKey("LeaveTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EmploymentType");
+
+                    b.Navigation("LeaveType");
                 });
 
             modelBuilder.Entity("WUIAM.Models.LeaveRequest", b =>

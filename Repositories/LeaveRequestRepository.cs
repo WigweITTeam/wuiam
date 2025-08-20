@@ -16,32 +16,53 @@ namespace WUIAM.Repositories
 
         public async Task<IEnumerable<LeaveRequest>> GetByUserIdAsync(Guid userId)
         {
-            return await _context.LeaveRequests
+            var requests =await _context.LeaveRequests
                 .Where(l => l.UserId == userId)
+                .Include(lu =>lu.User)
+                .Include(lr=> lr.LeaveType)
+                .ThenInclude(a => a.ApprovalFlow)
+                .ThenInclude(b =>b.Steps)
                 .ToListAsync();
+            foreach (var lt in requests)
+            {
+                if (lt.LeaveType.ApprovalFlow?.Steps != null)
+                {
+                    lt.LeaveType.ApprovalFlow.Steps = lt.LeaveType.ApprovalFlow.Steps
+                        .OrderBy(s => s.StepOrder)
+                        .ToList();
+                }
+            }
+            return requests;
         }
 
         public async Task<LeaveRequest?> GetByIdAsync(Guid id)
         {
-            return await _context.LeaveRequests.FirstOrDefaultAsync(l => l.Id == id);
+            return await _context.LeaveRequests
+                 .Include(lr => lr.LeaveType)
+                .Include(lu => lu.User)
+                .FirstOrDefaultAsync(l => l.Id == id);
         }
 
         public async Task<IEnumerable<LeaveRequest>> GetAllAsync()
         {
-            return await _context.LeaveRequests.ToListAsync();
+            return await _context.LeaveRequests
+                .Include(lr => lr.LeaveType)
+                .Include(lu => lu.User).ToListAsync();
         }
 
-        public async Task AddAsync(LeaveRequest request)
+        public async Task<LeaveRequest?> AddAsync(LeaveRequest request)
         {
-            await _context.LeaveRequests.AddAsync(request);
+         var l=   await _context.LeaveRequests.AddAsync(request);
             await _context.SaveChangesAsync();
+            return await GetByIdAsync(l.Entity.Id);
         }
 
 
-        public async Task UpdateAsync(LeaveRequest request)
+        public async Task<LeaveRequest> UpdateAsync(LeaveRequest request)
         {
-            _context.LeaveRequests.Update(request);
+         var l=   _context.LeaveRequests.Update(request);
             await _context.SaveChangesAsync();
+            return await GetByIdAsync(l.Entity.Id);
         }
     }
 }

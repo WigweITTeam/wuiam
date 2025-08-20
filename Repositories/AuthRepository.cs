@@ -32,17 +32,23 @@ namespace WUIAM.Repositories
         public async Task<User?> FindUserByEmailOrUserNameAsync(string Email)
         {
             var found = await dbContext.Users
+                .Include(a =>a.EmploymentType)
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .Include(up => up.UserPermissions)
                 .ThenInclude(up => up.Permission)
-                .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
+                
+                                .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
             return found;
         }
 
         public Task<User?> FindUserByIdAsync(Guid userId)
         {
-            return dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            return dbContext.Users.Include(a => a.EmploymentType)
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .Include(up => up.UserPermissions)
+                .ThenInclude(up => up.Permission).FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public async Task<MFAToken?> GetLatestTwoFactorTokenAsync(Guid userId)

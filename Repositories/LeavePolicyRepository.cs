@@ -23,16 +23,20 @@ namespace WUIAM.Repositories
 
         public async Task<List<LeavePolicy>> GetAllAsync()
         {
-            return await _context.LeavePolicies.ToListAsync();
+            return await _context.LeavePolicies
+                .Include(p => p.LeaveType)
+                .Include(lp =>lp.EmploymentType)
+                .ToListAsync();
         }
 
         public async Task<LeavePolicy> AddAsync(LeavePolicyDto leavePolicy)
         {
+            //Guid.TryParse(leavePolicy.EmploymentTypeId, out Guid employmentTypeId);
             var entity = new LeavePolicy
             {
                 Id = Guid.NewGuid(),
                 LeaveTypeId = leavePolicy.LeaveTypeId,
-                EmploymentType = leavePolicy.EmploymentType,
+                EmploymentTypeId = leavePolicy.EmploymentTypeId,
                 RoleName = leavePolicy.RoleName,
                 AnnualEntitlement = leavePolicy.AnnualEntitlement,
                 IsAccrualBased = leavePolicy.IsAccrualBased,
@@ -73,19 +77,19 @@ namespace WUIAM.Repositories
         public async Task<LeavePolicy?> GetApplicablePolicyAsync(User user, Guid leaveTypeId)
         {
             var userRoleNames = user.UserRoles.Select(ur => ur.Role.Name).ToList();
-            var employmentTypeName = user.EmploymentType?.Name;
+            var employmentTypeName = user.EmploymentType.Name;
 
             var policies = await _context.LeavePolicies
-                .Where(p => p.LeaveTypeId == leaveTypeId)
+                .Where(p => p.LeaveTypeId == leaveTypeId).Include(em =>em.EmploymentType)
                 .ToListAsync();
 
             // Prioritize policies that match both employment type and role
             var matchedPolicy = policies
                 .Where(p =>
-                    (string.IsNullOrEmpty(p.EmploymentType) || p.EmploymentType == employmentTypeName) &&
+                    (string.IsNullOrEmpty(p.EmploymentTypeId.ToString()) || p.EmploymentType.Name == employmentTypeName) &&
                     (string.IsNullOrEmpty(p.RoleName) || userRoleNames.Contains(p.RoleName))
                 )
-                .OrderByDescending(p => !string.IsNullOrEmpty(p.EmploymentType))
+                .OrderByDescending(p => !string.IsNullOrEmpty(p.LeaveType.Name.ToString()))
                 .ThenByDescending(p => !string.IsNullOrEmpty(p.RoleName))
                 .FirstOrDefault();
 

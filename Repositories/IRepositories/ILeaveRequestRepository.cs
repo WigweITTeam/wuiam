@@ -8,8 +8,8 @@ namespace WUIAM.Repositories.IRepositories
         Task<LeaveRequest?> GetByIdAsync(Guid id);
 
         Task<IEnumerable<LeaveRequest>> GetAllAsync();
-        Task AddAsync(LeaveRequest request);
+        Task<LeaveRequest> AddAsync(LeaveRequest request);
 
-        Task UpdateAsync(LeaveRequest request);
+        Task<LeaveRequest> UpdateAsync(LeaveRequest request);
     }
 }

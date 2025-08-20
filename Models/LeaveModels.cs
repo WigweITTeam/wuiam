@@ -11,6 +11,8 @@
         public bool IsActive { get; set; } = true;
         public bool? RequireDocument { get; set; }
         public Guid ApprovalFlowId { get; set; }
+        public string Gender { get; set; }
+        public ApprovalFlow ApprovalFlow { get; set; } = new();
         public List<LeaveTypeVisibility> VisibilityRules { get; set; } = new();
     }
 
@@ -61,6 +63,7 @@
 
         public LeaveType? LeaveType { get; set; }
         public User? User { get; set; }
+        public int TotalDays { get;  set; }
     }
 
     public class LeaveRequestApproval
@@ -161,7 +164,7 @@
         public Guid LeaveTypeId { get; set; }
         public LeaveType? LeaveType { get; set; }
 
-        public string? EmploymentType { get; set; } // e.g., "FullTime", "Contract" — optional
+        public Guid? EmploymentTypeId { get; set; } // e.g., "FullTime", "Contract" — optional
         public string? RoleName { get; set; }       // Optional: if some roles have custom entitlement
 
         public int AnnualEntitlement { get; set; } = 20;
@@ -173,6 +176,7 @@
         public bool IncludePublicHolidays { get; set; } = false;
         public bool AllowBackdatedRequest { get; set; } = false;
         public int MaxDaysPerRequest { get; set; }
+        public EmploymentType EmploymentType { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

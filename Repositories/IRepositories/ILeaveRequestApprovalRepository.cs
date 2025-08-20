@@ -10,6 +10,9 @@ namespace WUIAM.Repositories.IRepositories
 
         Task UpdateAsync(LeaveRequestApproval approval);
         Task<LeaveRequestApproval?> GetByStepOrderAndApprovalFlowIdAsync(Guid approvalFlowId, int stepOrder);
-        Task<LeaveRequestApproval?> GetByApprovalFlowIdAndApprovalPersonId(Guid? approvalFlowId, Guid? approvalPersonId);
+        Task<IEnumerable<LeaveRequestApproval?>> GetByApprovalFlowIdAndApprovalPersonId(Guid? approvalFlowId, Guid? approvalPersonId);
+
+        Task<IEnumerable<LeaveRequestApproval>> GetByApproverPersonIdAsync(Guid approverPersonId);
+        Task<IEnumerable<LeaveRequestApproval>> GetByApproverDelegationPersonIdAsync(Guid value);
     }
 }

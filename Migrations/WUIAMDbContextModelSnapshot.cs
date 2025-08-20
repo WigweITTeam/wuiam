@@ -268,8 +268,8 @@ namespace WUIAM.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("EmploymentType")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("EmploymentTypeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IncludePublicHolidays")
                         .HasColumnType("bit");
@@ -291,9 +291,11 @@ namespace WUIAM.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmploymentTypeId");
+
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("LeavePolicies");
+                    b.ToTable("LeavePolicy");
                 });
 
             modelBuilder.Entity("WUIAM.Models.LeaveRequest", b =>
@@ -324,6 +326,9 @@ namespace WUIAM.Migrations
 
                     b.Property<string>("SupportDocument")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalDays")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -385,7 +390,14 @@ namespace WUIAM.Migrations
                     b.Property<Guid>("ApprovalFlowId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ColorTag")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
@@ -405,6 +417,8 @@ namespace WUIAM.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApprovalFlowId");
 
                     b.ToTable("LeaveTypes");
                 });
@@ -830,11 +844,17 @@ namespace WUIAM.Migrations
 
             modelBuilder.Entity("WUIAM.Models.LeavePolicy", b =>
                 {
+                    b.HasOne("WUIAM.EmploymentType", "EmploymentType")
+                        .WithMany()
+                        .HasForeignKey("EmploymentTypeId");
+
                     b.HasOne("WUIAM.Models.LeaveType", "LeaveType")
                         .WithMany()
                         .HasForeignKey("LeaveTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EmploymentType");
 
                     b.Navigation("LeaveType");
                 });
@@ -883,6 +903,17 @@ namespace WUIAM.Migrations
                     b.Navigation("ApproverPerson");
 
                     b.Navigation("LeaveRequest");
+                });
+
+            modelBuilder.Entity("WUIAM.Models.LeaveType", b =>
+                {
+                    b.HasOne("WUIAM.Models.ApprovalFlow", "ApprovalFlow")
+                        .WithMany()
+                        .HasForeignKey("ApprovalFlowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApprovalFlow");
                 });
 
             modelBuilder.Entity("WUIAM.Models.LeaveTypeVisibility", b =>

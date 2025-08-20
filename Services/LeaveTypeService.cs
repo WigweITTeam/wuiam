@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.Security.Claims;
+using System.Text.Json;
 using WUIAM.DTOs;
 using WUIAM.Interfaces;
 using WUIAM.Models;
+using WUIAM.Repositories;
 using WUIAM.Repositories.IRepositories;
 
 namespace WUIAM.Services
@@ -9,9 +11,13 @@ namespace WUIAM.Services
     public class LeaveTypeService : ILeaveTypeService
     {
         private readonly ILeaveTypeRepository _leaveTypeRepository;
-        public LeaveTypeService(ILeaveTypeRepository leaveTypeRepository)
+        private readonly IHttpContextAccessor _contextAccessor;
+        
+
+        public LeaveTypeService(ILeaveTypeRepository leaveTypeRepository, IHttpContextAccessor httpContextAccessor)
         {
             _leaveTypeRepository = leaveTypeRepository;
+            _contextAccessor = httpContextAccessor;
         }
 
         public async Task<LeaveType> CreateLeaveType(CreateLeaveTypeDto dto)
@@ -30,6 +36,7 @@ namespace WUIAM.Services
                 IsPaid = dto.IsPaid,
                 Description = dto.Description,
                 ColorTag = dto.ColorTag,
+                Gender=dto.Gender,
                 IsActive = dto.IsActive,
                 RequireDocument = dto.RequireDocument,
                 ApprovalFlowId = dto.ApprovalFlowId,
@@ -68,6 +75,20 @@ namespace WUIAM.Services
             if (existing == null)
                 throw new KeyNotFoundException($"LeaveType with ID {leaveType.Id} not found.");
 
+            existing.VisibilityRules.Clear();
+
+            existing.Description = leaveType.Description;
+            existing.ColorTag = leaveType.ColorTag;
+
+            foreach (var rule in leaveType.VisibilityRules)
+            {
+                existing.VisibilityRules.Add(new LeaveTypeVisibility
+                {
+                    VisibilityType = rule.VisibilityType,
+                    Value = rule.Value
+                });
+            }
+
             existing.Name = leaveType.Name;
             existing.MaxDays = leaveType.MaxDays;
             existing.IsPaid = leaveType.IsPaid;
@@ -76,7 +97,19 @@ namespace WUIAM.Services
             await _leaveTypeRepository.UpdateAsync(existing);
             return existing;
         }
+      
 
+        public async Task<IEnumerable<LeaveType>> GetAvailableLeaveTypes()
+        {
+            var userClaim = _contextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+            {
+                return null;
+            }
+            Guid.TryParse(userClaim, out Guid userId);
 
+            var leaveTypes =await _leaveTypeRepository.GetVisibleLeaveTypesForUser(userId);
+            return leaveTypes;
+        }
     }
 }

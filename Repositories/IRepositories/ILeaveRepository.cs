@@ -15,7 +15,6 @@ namespace WUIAM.Repositories.IRepositories
             //Task<LeaveRequestApproval> ApproveOrRejectStepAsync(User user, Guid approvalId, ApprovalDecisionDto dto);
             Task<List<LeaveRequest>> GetAllLeaveRequestsAsync();
             Task<List<LeaveRequest>> GetLeaveRequestsByUserAsync(Guid userId);
-            Task<List<LeaveType>> GetVisibleLeaveTypesForUser(User user);
 
             Task<Leave> CreateLeaveFromApprovedRequestAsync(LeaveRequest request);
             Task<List<Leave>> GetActiveLeavesAsync();
