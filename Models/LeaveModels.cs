@@ -63,7 +63,7 @@
 
         public LeaveType? LeaveType { get; set; }
         public User? User { get; set; }
-        public int TotalDays { get;  set; }
+        public int TotalDays { get; set; }
     }
 
     public class LeaveRequestApproval
@@ -76,7 +76,6 @@
         public Guid? ActedByUserId { get; set; }
         public string? Comment { get; set; }
         public DateTime? DecisionAt { get; set; }
-
         public LeaveRequest? LeaveRequest { get; set; }
         public ApprovalStep? ApprovalStep { get; set; }
         public User? ApproverPerson { get; set; }

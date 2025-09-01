@@ -14,5 +14,6 @@ namespace WUIAM.Repositories.IRepositories
 
         Task<IEnumerable<LeaveRequestApproval>> GetByApproverPersonIdAsync(Guid approverPersonId);
         Task<IEnumerable<LeaveRequestApproval>> GetByApproverDelegationPersonIdAsync(Guid value);
+        Task<IEnumerable<LeaveRequestApproval>> GetAllRequestApprovals();
     }
 }

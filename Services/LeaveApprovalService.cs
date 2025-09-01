@@ -19,6 +19,16 @@ namespace WUIAM.Services
             _stepRepository = stepRepository;
             _httpContextAccessor = httpContextAccessor;
         }
+
+        public async Task<ApiResponse<IEnumerable<LeaveRequestApproval?>>> GetAllRequestApprovals()
+        {
+            var leaveRequestApprovals =await _leaveReqApprovalRepo.GetAllRequestApprovals();
+            if (leaveRequestApprovals == null || !leaveRequestApprovals.Any())
+            {
+                return ApiResponse<IEnumerable<LeaveRequestApproval?>>.Failure("No leave request approvals found.");
+            }
+            return ApiResponse<IEnumerable<LeaveRequestApproval?>>.Success("Leave requests found!", leaveRequestApprovals);
+        }
         public async Task<ApiResponse<IEnumerable<LeaveRequestApproval?>>> GetByApprovalFlowIdAndApprovalPersonId(Guid? approvalFlowId, Guid? approvalPersonId)
         {
             var leaveRequestApprovals = await _leaveReqApprovalRepo.GetByApprovalFlowIdAndApprovalPersonId(approvalFlowId, approvalPersonId);

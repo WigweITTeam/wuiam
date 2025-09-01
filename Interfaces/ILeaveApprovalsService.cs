@@ -11,7 +11,6 @@ namespace WUIAM.Interfaces
         Task<ApiResponse<IEnumerable<LeaveRequestApproval?>>> GetByApprovalFlowIdAndApprovalPersonId(Guid? approvalFlowId, Guid? approvalPersonId);
         Task<ApiResponse<IEnumerable<LeaveRequestApproval?>>> GetByApproverPersonId(Guid? approverPersonId);
         Task<ApiResponse<IEnumerable<LeaveRequestApproval?>>> GetByApproverDelegationPersonId(Guid? approverDelegationPersonId);
-
-
+        Task<ApiResponse<IEnumerable<LeaveRequestApproval?>>> GetAllRequestApprovals();
     }
 }

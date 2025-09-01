@@ -31,9 +31,9 @@ namespace WUIAM.Controllers
         {
 
             var request = await _leaveService.ApplyForLeaveAsync(leaveRequestCreateDto);
-            if (request.Status)
+             
                 return Ok(request);
-            return BadRequest(request);
+            
         }
         //PUT: /api/update-leave-request/{id}
         [HttpPut("update-leave-request/{id}")]
@@ -46,18 +46,11 @@ namespace WUIAM.Controllers
             }
 
             var request = await _leaveService.UpdateLeaveRequestAsync(id, leaveRequestCreateDto);
-            if (request.Status)
-                return Ok(request);
-            return BadRequest(request);
+             
+                return Ok(request); 
         }
 
-        //POST: api/leave/approve-leave
-        [HttpPost("approve-reject-leave/{approvalId}")]
-        public async Task<ActionResult<ApiResponse<LeaveRequest>>> ApproveRejectLeave([FromBody] ApprovalDecisionDto approvalDecisionDto, Guid approvalId)
-        {
-            var approval = await _leaveService.ApproveOrRejectStepAsync(approvalId, approvalDecisionDto);
-            return Ok(approval);
-        }
+      
         //GET: /api/leave/pending-leave-requests
         [HasPermission([Permissions.ApproveRequests, Permissions.AdminAccess, Permissions.ManageLeaveRequests])]
         [HttpGet("all-leave-requests")]
@@ -74,25 +67,7 @@ namespace WUIAM.Controllers
             return Ok(ApiResponse<IEnumerable<LeaveRequest>>.Success(result.Count() <= 0 ? "Leave request found" : "No leave request found", result));
 
         }
-        
-        //POST: /api/leave/approve-delegate
-        [HttpPost("delegate-approval")]
-        public async Task<ActionResult<ApiResponse<LeaveRequest>>> DelegateApproval([FromBody] ApprovalDelegationDto approvalDelegationDto)
-        {
-            var approval = await _leaveService.DelegateApprovalAsync(approvalDelegationDto);
-            return Ok(approval);
-        }
-        //DELETE: /api/leave/revoke-delegate
-        [HttpDelete("revoke-delegate/{delegationId}")]
-        public async Task<ActionResult<ApiResponse<ApprovalDelegation>>> RevokeApproval(Guid delegationId)
-        {
-            var result = await _leaveService.RevokeApprovalDelegationAsync(delegationId);
-            if (result.Status)
-                return Ok(result);
-            return BadRequest(result);
-        }
-
-      
+             
     }
 
 }
