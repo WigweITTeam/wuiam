@@ -11,7 +11,7 @@
         public bool IsActive { get; set; } = true;
         public bool? RequireDocument { get; set; }
         public Guid ApprovalFlowId { get; set; }
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
         public ApprovalFlow ApprovalFlow { get; set; } = new();
         public List<LeaveTypeVisibility> VisibilityRules { get; set; } = new();
     }
