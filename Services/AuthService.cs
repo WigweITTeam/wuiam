@@ -42,7 +42,7 @@ namespace WUIAM.Services
         public async Task<dynamic> LoginAsync(LoginDto loginDto)
         {
             var user = await _authRepository.FindUserByEmailOrUserNameAsync(loginDto.Email);
-
+            Console.WriteLine("user email address: " + loginDto.ToString(), user?.ToString());
             if (user == null)
             {
                 return new { Success = false, data = (object?)null, Message = "Invalid username or password!" };
