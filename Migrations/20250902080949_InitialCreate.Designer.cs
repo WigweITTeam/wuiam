@@ -12,7 +12,7 @@ using WUIAM.Models;
 namespace WUIAM.Migrations
 {
     [DbContext(typeof(WUIAMDbContext))]
-    [Migration("20250709102927_InitialCreate")]
+    [Migration("20250902080949_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -47,6 +47,46 @@ namespace WUIAM.Migrations
                     b.ToTable("EmploymentTypes");
                 });
 
+            modelBuilder.Entity("WUIAM.Models.ApprovalDelegation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApprovalFlowId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApprovalStepId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApproverPersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DelegatePersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalFlowId");
+
+                    b.HasIndex("ApprovalStepId");
+
+                    b.HasIndex("ApproverPersonId");
+
+                    b.HasIndex("DelegatePersonId");
+
+                    b.ToTable("ApprovalDelegations");
+                });
+
             modelBuilder.Entity("WUIAM.Models.ApprovalFlow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -67,7 +107,6 @@ namespace WUIAM.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VisibilityJson")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -93,7 +132,6 @@ namespace WUIAM.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConditionJson")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StepOrder")
@@ -212,6 +250,57 @@ namespace WUIAM.Migrations
                     b.ToTable("LeaveBalances");
                 });
 
+            modelBuilder.Entity("WUIAM.Models.LeavePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("AccrualRatePerMonth")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("AllowBackdatedRequest")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AllowNegativeBalance")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AnnualEntitlement")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EmploymentTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IncludePublicHolidays")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAccrualBased")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LeaveTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MaxCarryOverDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxDaysPerRequest")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RoleName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmploymentTypeId");
+
+                    b.HasIndex("LeaveTypeId");
+
+                    b.ToTable("LeavePolicy");
+                });
+
             modelBuilder.Entity("WUIAM.Models.LeaveRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -238,6 +327,12 @@ namespace WUIAM.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SupportDocument")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalDays")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -256,14 +351,16 @@ namespace WUIAM.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ActedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ApprovalStepId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ApproverId")
+                    b.Property<Guid>("ApproverPersonId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comment")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DecisionAt")
@@ -280,7 +377,7 @@ namespace WUIAM.Migrations
 
                     b.HasIndex("ApprovalStepId");
 
-                    b.HasIndex("ApproverId");
+                    b.HasIndex("ApproverPersonId");
 
                     b.HasIndex("LeaveRequestId");
 
@@ -296,6 +393,18 @@ namespace WUIAM.Migrations
                     b.Property<Guid>("ApprovalFlowId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ColorTag")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsPaid")
                         .HasColumnType("bit");
 
@@ -306,7 +415,12 @@ namespace WUIAM.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool?>("RequireDocument")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ApprovalFlowId");
 
                     b.ToTable("LeaveTypes");
                 });
@@ -618,7 +732,7 @@ namespace WUIAM.Migrations
                     b.Property<string>("UserEmail")
                         .IsRequired()
                         .IsUnicode(false)
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("varchar(900)");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(90)
@@ -634,9 +748,43 @@ namespace WUIAM.Migrations
 
                     b.HasIndex("EmploymentTypeId");
 
+                    b.HasIndex("UserEmail")
+                        .IsUnique();
+
                     b.HasIndex("UserTypeId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("WUIAM.Models.ApprovalDelegation", b =>
+                {
+                    b.HasOne("WUIAM.Models.ApprovalFlow", "ApprovalFlow")
+                        .WithMany()
+                        .HasForeignKey("ApprovalFlowId");
+
+                    b.HasOne("WUIAM.Models.ApprovalStep", "ApprovalStep")
+                        .WithMany()
+                        .HasForeignKey("ApprovalStepId");
+
+                    b.HasOne("WUIAM.User", "ApproverPerson")
+                        .WithMany()
+                        .HasForeignKey("ApproverPersonId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("WUIAM.User", "DelegatePerson")
+                        .WithMany()
+                        .HasForeignKey("DelegatePersonId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ApprovalFlow");
+
+                    b.Navigation("ApprovalStep");
+
+                    b.Navigation("ApproverPerson");
+
+                    b.Navigation("DelegatePerson");
                 });
 
             modelBuilder.Entity("WUIAM.Models.ApprovalStep", b =>
@@ -696,6 +844,23 @@ namespace WUIAM.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WUIAM.Models.LeavePolicy", b =>
+                {
+                    b.HasOne("WUIAM.EmploymentType", "EmploymentType")
+                        .WithMany()
+                        .HasForeignKey("EmploymentTypeId");
+
+                    b.HasOne("WUIAM.Models.LeaveType", "LeaveType")
+                        .WithMany()
+                        .HasForeignKey("LeaveTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EmploymentType");
+
+                    b.Navigation("LeaveType");
+                });
+
             modelBuilder.Entity("WUIAM.Models.LeaveRequest", b =>
                 {
                     b.HasOne("WUIAM.Models.LeaveType", "LeaveType")
@@ -725,7 +890,7 @@ namespace WUIAM.Migrations
 
                     b.HasOne("WUIAM.User", "ApproverPerson")
                         .WithMany()
-                        .HasForeignKey("ApproverId")
+                        .HasForeignKey("ApproverPersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -740,6 +905,17 @@ namespace WUIAM.Migrations
                     b.Navigation("ApproverPerson");
 
                     b.Navigation("LeaveRequest");
+                });
+
+            modelBuilder.Entity("WUIAM.Models.LeaveType", b =>
+                {
+                    b.HasOne("WUIAM.Models.ApprovalFlow", "ApprovalFlow")
+                        .WithMany()
+                        .HasForeignKey("ApprovalFlowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApprovalFlow");
                 });
 
             modelBuilder.Entity("WUIAM.Models.LeaveTypeVisibility", b =>

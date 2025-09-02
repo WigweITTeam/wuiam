@@ -20,7 +20,7 @@ namespace WUIAM.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    VisibilityJson = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    VisibilityJson = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,21 +53,6 @@ namespace WUIAM.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmploymentTypes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "LeaveTypes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MaxDays = table.Column<int>(type: "int", nullable: false),
-                    IsPaid = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovalFlowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LeaveTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,7 +141,7 @@ namespace WUIAM.Migrations
                     StepOrder = table.Column<int>(type: "int", nullable: false),
                     ApproverType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ApproverValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConditionJson = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ConditionJson = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -170,21 +155,27 @@ namespace WUIAM.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LeaveTypeVisibilities",
+                name: "LeaveTypes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LeaveTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VisibilityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaxDays = table.Column<int>(type: "int", nullable: false),
+                    IsPaid = table.Column<bool>(type: "bit", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ColorTag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    RequireDocument = table.Column<bool>(type: "bit", nullable: true),
+                    ApprovalFlowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LeaveTypeVisibilities", x => x.Id);
+                    table.PrimaryKey("PK_LeaveTypes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LeaveTypeVisibilities_LeaveTypes_LeaveTypeId",
-                        column: x => x.LeaveTypeId,
-                        principalTable: "LeaveTypes",
+                        name: "FK_LeaveTypes_ApprovalFlows_ApprovalFlowId",
+                        column: x => x.ApprovalFlowId,
+                        principalTable: "ApprovalFlows",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -222,7 +213,7 @@ namespace WUIAM.Migrations
                     UserName = table.Column<string>(type: "varchar(90)", unicode: false, maxLength: 90, nullable: true),
                     FirstName = table.Column<string>(type: "varchar(90)", unicode: false, maxLength: 90, nullable: false),
                     LastName = table.Column<string>(type: "varchar(90)", unicode: false, maxLength: 90, nullable: false),
-                    UserEmail = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    UserEmail = table.Column<string>(type: "varchar(900)", unicode: false, nullable: false),
                     Password = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
                     ResetPasswordToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDefault = table.Column<bool>(type: "bit", nullable: false),
@@ -257,6 +248,98 @@ namespace WUIAM.Migrations
                         principalTable: "UserTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LeavePolicy",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LeaveTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmploymentTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AnnualEntitlement = table.Column<int>(type: "int", nullable: false),
+                    IsAccrualBased = table.Column<bool>(type: "bit", nullable: false),
+                    AccrualRatePerMonth = table.Column<double>(type: "float", nullable: false),
+                    MaxCarryOverDays = table.Column<int>(type: "int", nullable: false),
+                    AllowNegativeBalance = table.Column<bool>(type: "bit", nullable: false),
+                    IncludePublicHolidays = table.Column<bool>(type: "bit", nullable: false),
+                    AllowBackdatedRequest = table.Column<bool>(type: "bit", nullable: false),
+                    MaxDaysPerRequest = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeavePolicy", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LeavePolicy_EmploymentTypes_EmploymentTypeId",
+                        column: x => x.EmploymentTypeId,
+                        principalTable: "EmploymentTypes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_LeavePolicy_LeaveTypes_LeaveTypeId",
+                        column: x => x.LeaveTypeId,
+                        principalTable: "LeaveTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LeaveTypeVisibilities",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LeaveTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VisibilityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeaveTypeVisibilities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LeaveTypeVisibilities_LeaveTypes_LeaveTypeId",
+                        column: x => x.LeaveTypeId,
+                        principalTable: "LeaveTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ApprovalDelegations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApproverPersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DelegatePersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApprovalFlowId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ApprovalStepId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApprovalDelegations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ApprovalDelegations_ApprovalFlows_ApprovalFlowId",
+                        column: x => x.ApprovalFlowId,
+                        principalTable: "ApprovalFlows",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ApprovalDelegations_ApprovalSteps_ApprovalStepId",
+                        column: x => x.ApprovalStepId,
+                        principalTable: "ApprovalSteps",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ApprovalDelegations_Users_ApproverPersonId",
+                        column: x => x.ApproverPersonId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ApprovalDelegations_Users_DelegatePersonId",
+                        column: x => x.DelegatePersonId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -299,9 +382,11 @@ namespace WUIAM.Migrations
                     LeaveTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SupportDocument = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AppliedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    AppliedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalDays = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -400,9 +485,10 @@ namespace WUIAM.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LeaveRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ApprovalStepId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ApproverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApproverPersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DecisionAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -421,8 +507,8 @@ namespace WUIAM.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LeaveRequestApprovals_Users_ApproverId",
-                        column: x => x.ApproverId,
+                        name: "FK_LeaveRequestApprovals_Users_ApproverPersonId",
+                        column: x => x.ApproverPersonId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -467,6 +553,26 @@ namespace WUIAM.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ApprovalDelegations_ApprovalFlowId",
+                table: "ApprovalDelegations",
+                column: "ApprovalFlowId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalDelegations_ApprovalStepId",
+                table: "ApprovalDelegations",
+                column: "ApprovalStepId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalDelegations_ApproverPersonId",
+                table: "ApprovalDelegations",
+                column: "ApproverPersonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApprovalDelegations_DelegatePersonId",
+                table: "ApprovalDelegations",
+                column: "DelegatePersonId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ApprovalSteps_ApprovalFlowId",
                 table: "ApprovalSteps",
                 column: "ApprovalFlowId");
@@ -483,14 +589,24 @@ namespace WUIAM.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_LeavePolicy_EmploymentTypeId",
+                table: "LeavePolicy",
+                column: "EmploymentTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LeavePolicy_LeaveTypeId",
+                table: "LeavePolicy",
+                column: "LeaveTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LeaveRequestApprovals_ApprovalStepId",
                 table: "LeaveRequestApprovals",
                 column: "ApprovalStepId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LeaveRequestApprovals_ApproverId",
+                name: "IX_LeaveRequestApprovals_ApproverPersonId",
                 table: "LeaveRequestApprovals",
-                column: "ApproverId");
+                column: "ApproverPersonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LeaveRequestApprovals_LeaveRequestId",
@@ -521,6 +637,11 @@ namespace WUIAM.Migrations
                 name: "IX_Leaves_UserId",
                 table: "Leaves",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LeaveTypes_ApprovalFlowId",
+                table: "LeaveTypes",
+                column: "ApprovalFlowId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LeaveTypeVisibilities_LeaveTypeId",
@@ -563,6 +684,12 @@ namespace WUIAM.Migrations
                 column: "EmploymentTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_UserEmail",
+                table: "Users",
+                column: "UserEmail",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_UserTypeId",
                 table: "Users",
                 column: "UserTypeId");
@@ -572,7 +699,13 @@ namespace WUIAM.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ApprovalDelegations");
+
+            migrationBuilder.DropTable(
                 name: "LeaveBalances");
+
+            migrationBuilder.DropTable(
+                name: "LeavePolicy");
 
             migrationBuilder.DropTable(
                 name: "LeaveRequestApprovals");
@@ -614,13 +747,13 @@ namespace WUIAM.Migrations
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "ApprovalFlows");
-
-            migrationBuilder.DropTable(
                 name: "LeaveTypes");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "ApprovalFlows");
 
             migrationBuilder.DropTable(
                 name: "Departments");
