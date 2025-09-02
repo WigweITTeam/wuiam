@@ -77,9 +77,10 @@ namespace WUIAM
 
     public class EmploymentType
     {
+        [Key]
         public Guid Id { get; set; }
-        public string Name { get; set; }       // e.g., "FullTime", "Contract", "Adjunct"
-        public string Description { get; set; } // Optional: e.g., "Full-time permanent staff"
+        public required string Name { get; set; }       // e.g., "FullTime", "Contract", "Adjunct"
+        public string Description { get; set; } = string.Empty; // Optional: e.g., "Full-time permanent staff"
         public bool IsActive { get; set; } = true;
     }
 

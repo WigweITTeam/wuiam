@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using WUIAM.DTOs; 
+using WUIAM.DTOs;
 using WUIAM.Models;
 using WUIAM.Repositories.IRepositories;
 
@@ -32,13 +32,12 @@ namespace WUIAM.Repositories
         public async Task<User?> FindUserByEmailOrUserNameAsync(string Email)
         {
             var found = await dbContext.Users
-                .Include(a =>a.EmploymentType)
+                .Include(a => a.EmploymentType)
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .Include(up => up.UserPermissions)
                 .ThenInclude(up => up.Permission)
-                
-                                .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
+                .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
             return found;
         }
 
