@@ -167,11 +167,19 @@ builder.Services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider, Micr
 var app = builder.Build();
 
 // Apply migrations
-using (var scope = app.Services.CreateScope())
+
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<WUIAMDbContext>();
     db.Database.Migrate();
+    Console.WriteLine("✅ Migration completed successfully.");
 }
+catch (Exception ex)
+{
+    Console.WriteLine($"❌ Migration failed: {ex.Message}");
+}
+
 
 // Dev-only Swagger
 if (app.Environment.IsDevelopment())
