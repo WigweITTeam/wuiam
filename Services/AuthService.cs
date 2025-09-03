@@ -1,10 +1,11 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using WUIAM.DTOs;
 using WUIAM.Enums;
 using WUIAM.Interfaces;
@@ -132,7 +133,7 @@ namespace WUIAM.Services
                 issuer: _jwtIssuer,
                 audience: _jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(1), // Token expiration in 15 minutes time
+                expires: DateTime.UtcNow.AddHours(2), // Token expiration in 15 minutes time
                 signingCredentials: creds
             );
 
@@ -338,11 +339,15 @@ namespace WUIAM.Services
         }
         public async Task<dynamic> GetRefreshTokenAsync(string refreshToken)
         {
-            var token = await _authRepository.GetRefreshTokenAsync(refreshToken)
-                ?? throw new InvalidOperationException("Refresh token not found.");
+            var token = await _authRepository.GetRefreshTokenAsync(refreshToken);
+            if (token == null)
+            {
+                return new { Success = false, Message = "Refresh token not found!" };
+
+            }
 
             if (token.IsExpired)
-                throw new InvalidOperationException("Refresh token has expired.");
+                return new { Success = false, Message = "Refresh token has expired!" };
 
             var user = await _authRepository.FindUserByIdAsync(token.UserId) ?? throw new InvalidOperationException("User not found for this refresh token.");
             //_authRepository.ExpireRefreshTokenAsync(token);
