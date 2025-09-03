@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using WUIAM.Enums; 
+using WUIAM.Enums;
 using WUIAM.Models;
 
 namespace WUIAM.Services.Config.SeedService
@@ -26,7 +26,7 @@ namespace WUIAM.Services.Config.SeedService
                     _context.Roles.Add(new()
                     {
                         Name = role,
-                        Description = "The {role} role access"
+                        Description = "The " + role + " role access"
                     });
                 }
                 _context.SaveChanges();
@@ -39,7 +39,7 @@ namespace WUIAM.Services.Config.SeedService
                     _context.EmploymentTypes.Add(new()
                     {
                         Name = emtype,
-                        Description = "The ${emtype} employment type",
+                        Description = "The " + emtype + " employment type",
                         IsActive = true
 
                     });
@@ -86,7 +86,7 @@ namespace WUIAM.Services.Config.SeedService
                     _context.Permissions.Add(new()
                     {
                         Name = permissionName,
-                        Description = "Permission to {permissionName.ToLower()}"
+                        Description = "Permission to " + permissionName.ToLower()
                     });
                 }
                 _context.SaveChanges();
