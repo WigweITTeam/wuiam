@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
 using WUIAM.DTOs;
 using WUIAM.Interfaces;
@@ -11,12 +12,14 @@ namespace WUIAM.Services
     public class LeaveTypeService : ILeaveTypeService
     {
         private readonly ILeaveTypeRepository _leaveTypeRepository;
+        private readonly IApprovalFlowRepository _approvalFlowRepository;
         private readonly IHttpContextAccessor _contextAccessor;
-        
+                
 
-        public LeaveTypeService(ILeaveTypeRepository leaveTypeRepository, IHttpContextAccessor httpContextAccessor)
+        public LeaveTypeService(IApprovalFlowRepository approvalFlowRepository, ILeaveTypeRepository leaveTypeRepository, IHttpContextAccessor httpContextAccessor)
         {
             _leaveTypeRepository = leaveTypeRepository;
+            _approvalFlowRepository = approvalFlowRepository;
             _contextAccessor = httpContextAccessor;
         }
 
@@ -27,6 +30,12 @@ namespace WUIAM.Services
                 VisibilityType = v.VisibilityType,
                 Value = v.Value
             }).ToList();
+            var approvalFlow = await _approvalFlowRepository.GetByIdAsync(dto.ApprovalFlowId);
+   
+            if (approvalFlow == null)
+            {
+                throw new InvalidOperationException("Invalid ApprovalFlowId. ApprovalFlow does not exist.");
+            }
 
             var leaveType = new LeaveType
             {
