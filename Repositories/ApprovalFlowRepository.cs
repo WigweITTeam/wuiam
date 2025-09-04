@@ -58,10 +58,12 @@ namespace WUIAM.Repositories
             var existing = await _context.ApprovalFlows.FirstOrDefaultAsync(x => x.Id == approvalFlow.Id);
             if (existing == null)
                 throw new InvalidOperationException("ApprovalFlow not found.");
+            existing.Steps = approvalFlow.Steps;
+            existing.Name = approvalFlow.Name;
 
-            _context.Entry(existing).CurrentValues.SetValues(approvalFlow);
+            _context.ApprovalFlows.Update(existing);
             await _context.SaveChangesAsync();
-            return existing;
+            return approvalFlow;
         }
     }
 

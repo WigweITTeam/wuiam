@@ -90,29 +90,65 @@ namespace WUIAM.Repositories
                 .Where(x => delegationStepIds.Contains(x.ApprovalStepId))
                 .ToListAsync();
 
-            return directApprovals
+            var allApprovals = directApprovals
                 .Concat(delegatedApprovals)
                 .GroupBy(x => x.Id)
                 .Select(g => g.First())
                 .ToList();
+
+            // Filter: Only return approvals where all previous steps are approved
+            var result = allApprovals.Where(a =>
+            {
+                var stepOrder = a.ApprovalStep.StepOrder; // assuming ApprovalStep has "Order"
+
+                if (stepOrder == 1)
+                    return true; // first step, no previous approval required
+
+                // Check if all lower steps are approved for the same LeaveRequest
+                var previousStepsApproved = _context.LeaveRequestApprovals
+                    .Where(x => x.LeaveRequestId == a.LeaveRequestId
+                                && x.ApprovalStep.StepOrder < stepOrder)
+                    .All(x => x.Status == "Approved"); // adjust if you use a Status column instead
+
+                return previousStepsApproved;
+            });
+
+            return result.ToList();
         }
 
         public async Task<IEnumerable<LeaveRequestApproval>> GetByApproverDelegationPersonIdAsync(Guid approvalDelegationPersonId)
         {
             var delegationStepIds = await _context.ApprovalDelegations
-                //.Include(d => d.DelegatePerson)
-                //.Include(d => d.ApproverPerson)
                 .Where(d => d.DelegatePersonId == approvalDelegationPersonId)
                 .Select(d => d.ApprovalStepId)
                 .ToListAsync();
 
-            return await _context.LeaveRequestApprovals
+            var delegatedApprovals = await _context.LeaveRequestApprovals
                 .Include(a => a.ApprovalStep)
                 .Include(d => d.ApproverPerson)
                 .Include(d => d.LeaveRequest)
-                .ThenInclude(a => a!.LeaveType)
+                    .ThenInclude(a => a!.LeaveType)
                 .Where(x => delegationStepIds.Contains(x.ApprovalStepId))
                 .ToListAsync();
+
+            // Filter: Only show if all previous steps are approved
+            var result = delegatedApprovals.Where(a =>
+            {
+                var stepOrder = a.ApprovalStep.StepOrder; // assumes ApprovalStep has "Order" or "StepNumber"
+
+                if (stepOrder == 1)
+                    return true; // First step, no prior approval required
+
+                // Check if all previous steps for this LeaveRequest are approved
+                var previousStepsApproved = _context.LeaveRequestApprovals
+                    .Where(x => x.LeaveRequestId == a.LeaveRequestId
+                                && x.ApprovalStep.StepOrder < stepOrder)
+                    .All(x => x.Status == "Approved");
+
+                return previousStepsApproved;
+            });
+
+            return result.ToList();
         }
 
         public async Task<IEnumerable<LeaveRequestApproval>> GetAllRequestApprovals()

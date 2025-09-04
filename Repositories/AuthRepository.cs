@@ -140,7 +140,7 @@ namespace WUIAM.Repositories
             var lowerValue = approverValue.ToLower();
 
             var users = await dbContext.Users
-                .Where(u => u.UserRoles.Any(ur => ur.Role.Name.ToLower() == lowerValue))
+                .Where(u => u.UserRoles.Any(ur => ur.Role.Id.ToString() == lowerValue))
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
