@@ -22,7 +22,7 @@ namespace WUIAM.Repositories
                 dbContext.MFATokens.Remove(token);
                 await dbContext.SaveChangesAsync();
             }
-
+           
         }
 
         public Task<User?> FindUserByEmailAsync(string Email)
@@ -35,8 +35,11 @@ namespace WUIAM.Repositories
                 .Include(a => a.EmploymentType)
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
+                .ThenInclude(a =>a.RolePermissions)
+                .ThenInclude(s=>s.Permission)
                 .Include(up => up.UserPermissions)
                 .ThenInclude(up => up.Permission)
+
                 .FirstOrDefaultAsync(u => u.UserEmail == Email || u.UserName == Email);
             return found;
         }

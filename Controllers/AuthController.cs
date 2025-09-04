@@ -26,9 +26,9 @@ namespace WUIAM.Controllers
         {
             var result = await _authService.LoginAsync(request);
             if (!result.Success)
-                return Unauthorized(result.Message);
+                return Ok(ApiResponse<dynamic>.Failure(result.Message));
 
-            return Ok(result);
+            return Ok(ApiResponse<dynamic>.Success(result.Message,result.data));
         }
         [AllowAnonymous]
         [HttpPost("verify-login-token")]
@@ -36,7 +36,7 @@ namespace WUIAM.Controllers
         {
             var result = await _authService.VerifyLoginTokenAsync(request.Email, request.Token);
             if (!result.Success)
-                return Unauthorized(result.Message);
+                return Ok(ApiResponse<dynamic>.Failure(result.Message));
 
             var refreshToken = result.refreshToken;
             Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
@@ -48,7 +48,7 @@ namespace WUIAM.Controllers
                 Path = "/" // Scope of cookie
             });
 
-            return Ok(result);
+            return Ok(ApiResponse<dynamic>.Success(result.Message, result.data));
         }
         //[AllowAnonymous]
         [HttpGet("users")]

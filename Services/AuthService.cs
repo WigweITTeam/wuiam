@@ -133,7 +133,7 @@ namespace WUIAM.Services
                 issuer: _jwtIssuer,
                 audience: _jwtAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // Token expiration in 15 minutes time
+                expires: DateTime.UtcNow.AddDays(1), // Token expiration in 2 hours time
                 signingCredentials: creds
             );
 
@@ -305,6 +305,7 @@ namespace WUIAM.Services
         public async Task<dynamic> VerifyLoginTokenAsync(string email, string token)
         {
             var user = await _authRepository.FindUserByEmailOrUserNameAsync(email);
+       
             if (user == null)
             {
                 return new { Success = false, data = (object?)null };
@@ -328,6 +329,7 @@ namespace WUIAM.Services
             await _authRepository.ExpireTwoFactorTokenAsync(mfaToken.Id);
 
             // Proceed with login and return JWT token
+            //user.Password = null;
             return await LoginTokenResponse(user);
         }
 

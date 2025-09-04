@@ -16,7 +16,7 @@ public class LeaveDateCalculator : ILeaveDateCalculator
             }
         }
 
-        return await Task.FromResult(workingDays);
+        return await Task.FromResult(workingDays > 0 ? workingDays : 1);
     }
 
 }

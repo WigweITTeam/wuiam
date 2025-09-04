@@ -135,14 +135,23 @@ namespace WUIAM.Services.Config.SeedService
                 var adminAccessPermission = _context.Permissions.FirstOrDefault(p => p.Name == Permissions.AdminAccess.ToString());
                 if (adminAccessPermission != null && !_context.RolePermissions.Any(rp => rp.RoleId == adminRole.Id && rp.PermissionId == adminAccessPermission.Id))
                 {
-                    _context.RolePermissions.Add(new()
+                    // _context.RolePermissions.Add(new()
+                    // {
+                    //     RoleId = adminRole.Id,
+                    //     PermissionId = adminAccessPermission.Id,
+                    //     GrantedAt = DateTime.Now
+                    // });
+                    // _context.UserPermissions.Add(new UserPermission { UserId = adminUser.Id, PermissionId = adminAccessPermission!.Id });
+                    var permissions = _context.Permissions.ToList();
+                    foreach (var item in permissions)
                     {
-                        RoleId = adminRole.Id,
-                        PermissionId = adminAccessPermission.Id,
-                        GrantedAt = DateTime.Now
-                    });
-                    _context.UserPermissions.Add(new UserPermission { UserId = adminUser.Id, PermissionId = adminAccessPermission!.Id });
-
+                        _context.RolePermissions.Add(new()
+                        {
+                            RoleId = adminRole.Id,
+                            PermissionId = item.Id,
+                            GrantedAt = DateTime.UtcNow
+                        });
+                    }
                     _context.SaveChanges();
                 }
 
